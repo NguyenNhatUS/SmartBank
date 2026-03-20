@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AccountResponse {
 
-    private Long id;
+    private Integer id;
     private String accountNumber;
     private String type;
     private BigDecimal balance;

@@ -3,7 +3,9 @@ package com.SmartBank.mapper;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.CustomerResponse;
 import com.SmartBank.model.Customer;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CustomerMapper {
     public Customer toEntity(CustomerRequest request) {
         return Customer.builder()
@@ -23,6 +25,9 @@ public class CustomerMapper {
                 .phone(customer.getPhone())
                 .address(customer.getAddress())
                 .dateOfBirth(customer.getDateOfBirth())
+                .status(String.valueOf(customer.getStatus()))
+                .createdAt(customer.getCreatedAt())
+                .totalAccounts(customer.getAccountList().size())
                 .build();
     }
 

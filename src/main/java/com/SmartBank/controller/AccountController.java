@@ -3,14 +3,11 @@ package com.SmartBank.controller;
 import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
-import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.model.Customer;
 import com.SmartBank.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @Controller
@@ -26,7 +23,6 @@ public class AccountController {
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.create(request));
-
     }
 
     @GetMapping("/api/accounts/{id}")

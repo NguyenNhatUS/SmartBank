@@ -51,6 +51,11 @@ public class AccountService {
 
     public AccountResponse getByID(Integer id) {
         Account account = accountRepository.findById(id).orElse(null);
+
+        if(account == null) {
+            throw new RuntimeException("Account does not exists");
+        }
+
         return mapper.toResponse(account);
     }
 
@@ -75,7 +80,6 @@ public class AccountService {
 
         return mapper.toResponse(accountRepository.save(account));
     }
-
 
     public List<CustomerAccountResponse> findAllGroupedByCustomer() {
         return accountRepository.findAllByOrderByCustomerIdAsc()

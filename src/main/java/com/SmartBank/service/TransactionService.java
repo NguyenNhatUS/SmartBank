@@ -12,7 +12,6 @@ import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -63,7 +62,6 @@ public class TransactionService {
     private String generateTransactionCode() {
         return "TXN" + System.currentTimeMillis();
     }
-
 
     @Transactional
     public TransactionResponse withdraw(@Valid DepositWithDrawRequest request) {

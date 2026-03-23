@@ -18,7 +18,7 @@ public class TransactionMapper {
                 .createdAt(transaction.getCreatedAt())
                 .sourceAccountNumber(transaction.getSourceAccount().getAccountNumber())
                 .targetAccountNumber(
-                        transaction.getTargetAccount() != null
+                        (transaction.getTargetAccount() != null)
                                 ? transaction.getTargetAccount().getAccountNumber()
                                 : null
                 )

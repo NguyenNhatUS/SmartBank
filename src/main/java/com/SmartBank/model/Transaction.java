@@ -40,7 +40,7 @@ public class Transaction {
     private Account sourceAccount;
 
     @ManyToOne
-    @JoinColumn(name = "target_account", nullable = false)
+    @JoinColumn(name = "target_account")
     private Account targetAccount;
 
     @PrePersist void onCreate() {

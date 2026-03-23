@@ -9,6 +9,7 @@ import com.SmartBank.model.enums.AccountStatus;
 import com.SmartBank.model.enums.TransactionType;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,8 +27,14 @@ public class TransactionService {
         this.mapper = mapper;
     }
 
+    @Transactional
     public TransactionResponse deposit(DepositWithDrawRequest request) {
+
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
+
+        if(account == null) {
+            throw new RuntimeException("Account does not exists");
+        }
 
         if(account.getStatus() != AccountStatus.ACTIVE) {
             throw new RuntimeException("Account is not in active");

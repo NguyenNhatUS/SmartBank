@@ -1,17 +1,13 @@
 package com.SmartBank.controller;
 
-
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.model.enums.CustomerStatus;
 import com.SmartBank.service.CustomerService;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 

@@ -9,7 +9,4 @@ public class SmartBankApplication {
 		SpringApplication.run(SmartBankApplication.class, args);
 	}
 
-
-
-
 }

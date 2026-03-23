@@ -62,7 +62,7 @@ public class CustomerService {
     public CustomerResponse update(Integer id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new RuntimeException("Customer does not exists");
+            throw new RuntimeException("Customer not found");
         }
 
         customer.setFullName(request.getFullName());
@@ -72,7 +72,6 @@ public class CustomerService {
         customer.setDateOfBirth(request.getDateOfBirth());
 
         return customerMapper.toResponse(customer);
-
     }
 
     public @Nullable List<AccountResponse> getAccountsByID(Integer id) {

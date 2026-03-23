@@ -1,6 +1,7 @@
 package com.SmartBank.repository;
 
 import com.SmartBank.model.Account;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +13,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     List<Account> findAllByOrderByCustomerIdAsc();
 
-
+    Account findByAccountNumber(String accountNumber);
 }

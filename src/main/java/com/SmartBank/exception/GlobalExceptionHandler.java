@@ -1,4 +1,4 @@
-package com.exception;
+package com.SmartBank.exception;
 
 import com.SmartBank.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;

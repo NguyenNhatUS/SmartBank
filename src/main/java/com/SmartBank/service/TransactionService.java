@@ -3,6 +3,9 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.DepositWithDrawRequest;
 import com.SmartBank.dto.request.TransferRequest;
 import com.SmartBank.dto.response.TransactionResponse;
+import com.SmartBank.exception.AccountNotActiveException;
+import com.SmartBank.exception.InsufficientFundsException;
+import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.TransactionMapper;
 import com.SmartBank.model.Account;
 import com.SmartBank.model.Transaction;
@@ -37,11 +40,11 @@ public class TransactionService {
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
 
         if(account == null) {
-            throw new RuntimeException("Account does not exists");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         if(account.getStatus() != AccountStatus.ACTIVE) {
-            throw new RuntimeException("Account is not in active");
+            throw new AccountNotActiveException("Account is not ACTIVE");
         }
 
         account.setBalance(account.getBalance().add(request.getAmount()));
@@ -68,15 +71,17 @@ public class TransactionService {
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
 
         if(account == null) {
-            throw new RuntimeException("Account does not exists");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         if(account.getStatus() != AccountStatus.ACTIVE) {
-            throw new RuntimeException("Account is not in active");
+            throw new AccountNotActiveException("Account is not ACTIVE");
         }
 
         if (account.getBalance().subtract(request.getAmount()).compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("Insufficient balance");
+            throw new InsufficientFundsException(
+                    "Insufficient balance. Available: " + account.getBalance() + " VND, Requested: " + request.getAmount() + " VND"
+            );
         }
 
         account.setBalance(account.getBalance().subtract(request.getAmount()));
@@ -101,19 +106,21 @@ public class TransactionService {
         Account target = accountRepository.findByAccountNumber(request.getTargetAccountNumber());
 
         if(source == null || target == null) {
-            throw new RuntimeException("Account not found");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         if(source.getStatus() != AccountStatus.ACTIVE) {
-            throw new RuntimeException("Account is not in active");
+            throw new AccountNotActiveException("Account is not ACTIVE");
         }
 
         if(target.getStatus() != AccountStatus.ACTIVE) {
-            throw new RuntimeException("Account is not in active");
+            throw new AccountNotActiveException("Account is not ACTIVE");
         }
 
-        if(source.getBalance().compareTo(request.getAmount()) < 0) {
-            throw new RuntimeException("Insufficient Funds Exception");
+        if (source.getBalance().compareTo(request.getAmount()) < 0) {
+            throw new InsufficientFundsException(
+                    "Insufficient balance for transfer. Available: " + source.getBalance() + " VND, Requested: " + request.getAmount() + " VND"
+            );
         }
 
         source.setBalance(source.getBalance().subtract(request.getAmount()));

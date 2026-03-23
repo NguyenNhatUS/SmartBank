@@ -4,6 +4,7 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
+import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.model.Account;
@@ -32,7 +33,6 @@ public class CustomerService {
     public CustomerResponse create(CustomerRequest request) {
         Customer customer = customerMapper.toEntity(request);
         Customer savedCustomer = repository.save(customer);
-
         return customerMapper.toResponse(savedCustomer);
     }
 
@@ -46,7 +46,7 @@ public class CustomerService {
     public @Nullable CustomerResponse getById(Integer id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new RuntimeException("Customer does not exists!!!");
+            throw new ResourceNotFoundException("Customer not found");
         }
         return customerMapper.toResponse(customer);
     }
@@ -54,7 +54,7 @@ public class CustomerService {
     public void deleteById(Integer id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new RuntimeException("Customer does not exists!!!");
+            throw new ResourceNotFoundException("Customer not found");
         }
         repository.deleteById(id);
     }
@@ -62,7 +62,7 @@ public class CustomerService {
     public CustomerResponse update(Integer id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new RuntimeException("Customer not found");
+            throw new ResourceNotFoundException("Customer not found");
         }
 
         customer.setFullName(request.getFullName());
@@ -77,7 +77,7 @@ public class CustomerService {
     public @Nullable List<AccountResponse> getAccountsByID(Integer id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new RuntimeException("Customer does not exists");
+            throw new ResourceNotFoundException("Customer not found");
         }
 
         List<Account> accountList = customer.getAccountList();

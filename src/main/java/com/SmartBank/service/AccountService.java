@@ -3,6 +3,7 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
+import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.model.Account;
 import com.SmartBank.model.Customer;
@@ -53,7 +54,7 @@ public class AccountService {
         Account account = accountRepository.findById(id).orElse(null);
 
         if(account == null) {
-            throw new RuntimeException("Account does not exists");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         return mapper.toResponse(account);
@@ -62,7 +63,7 @@ public class AccountService {
     public AccountResponse freeze(Integer id) {
         Account account = accountRepository.findById(id).orElse(null);
         if(account == null) {
-            throw new RuntimeException("Account does not exists");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         account.setStatus(AccountStatus.valueOf("FROZEN"));
@@ -73,7 +74,7 @@ public class AccountService {
     public AccountResponse close(Integer id) {
         Account account = accountRepository.findById(id).orElse(null);
         if(account == null) {
-            throw new RuntimeException("Account does not exists");
+            throw new ResourceNotFoundException("Account not found");
         }
 
         account.setStatus(AccountStatus.valueOf("CLOSED"));

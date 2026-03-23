@@ -1,4 +1,4 @@
-package com.exception;
+package com.SmartBank.exception;
 
 public class WebException extends RuntimeException {
     private final int statusCode;

@@ -1,8 +1,8 @@
-package com.exception;
+package com.SmartBank.exception;
 
 public class ResourceNotFoundException extends WebException{
 
-    public ResourceNotFoundException(int statusCode, String message) {
+    public ResourceNotFoundException(String message) {
         super(404, message);
     }
 }

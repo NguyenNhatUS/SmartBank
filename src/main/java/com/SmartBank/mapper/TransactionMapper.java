@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TransactionMapper {
-
-
     public TransactionResponse toResponse(Transaction transaction) {
         return TransactionResponse.builder()
                 .id(transaction.getId())

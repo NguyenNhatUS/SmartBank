@@ -2,8 +2,8 @@ package com.SmartBank.dto.request;
 
 
 import com.SmartBank.model.Account;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -16,11 +16,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class TransferRequest {
-    @NotNull(message = "source_account can non ben null")
-    private Account sourceAccount;
+    @NotBlank(message = "Account can not be null")
+    private String sourceAccountNumber;
 
-    @NotNull(message = "source_account can non ben null")@NotNull(message = "source_account can non ben null")
-    private Account targetAccount;
+    @NotBlank(message = "Account can not be null")
+    private String targetAccountNumber;
 
     @NotNull(message = "amount can not be null")
     @DecimalMin(value = "1000", message = "need at least 1000")

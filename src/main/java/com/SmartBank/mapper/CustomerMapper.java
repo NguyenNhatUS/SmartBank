@@ -27,7 +27,7 @@ public class CustomerMapper {
                 .dateOfBirth(customer.getDateOfBirth())
                 .status(String.valueOf(customer.getStatus()))
                 .createdAt(customer.getCreatedAt())
-                .totalAccounts(customer.getAccountList().size())
+                .totalAccounts(customer.getAccountList() == null ? 0 : customer.getAccountList().size())
                 .build();
     }
 

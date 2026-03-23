@@ -1,6 +1,7 @@
 package com.SmartBank.controller;
 
 import com.SmartBank.dto.request.DepositWithDrawRequest;
+import com.SmartBank.dto.request.TransferRequest;
 import com.SmartBank.dto.response.TransactionResponse;
 import com.SmartBank.service.TransactionService;
 import jakarta.validation.Valid;
@@ -25,6 +26,17 @@ public class TransactionController {
                 .body(service.deposit(request));
     }
 
+    @PostMapping("/api/transactions/withdraw")
+    public ResponseEntity<TransactionResponse> withdraw(@Valid @RequestBody DepositWithDrawRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.withdraw(request));
+    }
+
+    @PostMapping("/api/transactions/transfer")
+    public ResponseEntity<TransactionResponse> transfer(@Valid @RequestBody TransferRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.transfer(request));
+    }
 
 
 }

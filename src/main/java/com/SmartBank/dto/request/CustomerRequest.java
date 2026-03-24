@@ -3,7 +3,6 @@ package com.SmartBank.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Getter

@@ -1,6 +1,5 @@
 package com.SmartBank.service;
 
-
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
@@ -43,7 +42,7 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public @Nullable CustomerResponse getById(Integer id) {
+    public CustomerResponse getById(Integer id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");

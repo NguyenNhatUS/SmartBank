@@ -3,11 +3,13 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
+import com.SmartBank.exception.DuplicateResourceException;
 import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.model.Account;
 import com.SmartBank.model.Customer;
+import com.SmartBank.model.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,15 @@ public class CustomerService {
     }
 
     public CustomerResponse create(CustomerRequest request) {
+
+        if(repository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("Email can not be duplicated");
+        }
+
+        if(repository.existsByPhone(request.getPhone())) {
+            throw new DuplicateResourceException("Phone can not be duplicated");
+        }
+
         Customer customer = customerMapper.toEntity(request);
         Customer savedCustomer = repository.save(customer);
         return customerMapper.toResponse(savedCustomer);
@@ -55,6 +66,7 @@ public class CustomerService {
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
         }
+        customer.setStatus(CustomerStatus.LOCKED);
         repository.deleteById(id);
     }
 

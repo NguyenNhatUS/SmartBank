@@ -32,7 +32,9 @@ public class AccountService {
 
 
     public AccountResponse create(AccountCreateRequest request) {
-        Customer customer = customerRepository.findById(request.getCustomerId()).orElse(null);
+        Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
+                () -> new ResourceNotFoundException("Customer not found")
+        );
 
         Account account = mapper.toEntity(request, customer);
 
@@ -51,20 +53,13 @@ public class AccountService {
     }
 
     public AccountResponse getByID(Integer id) {
-        Account account = accountRepository.findById(id).orElse(null);
-
-        if(account == null) {
-            throw new ResourceNotFoundException("Account not found");
-        }
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         return mapper.toResponse(account);
     }
 
     public AccountResponse freeze(Integer id) {
-        Account account = accountRepository.findById(id).orElse(null);
-        if(account == null) {
-            throw new ResourceNotFoundException("Account not found");
-        }
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         account.setStatus(AccountStatus.valueOf("FROZEN"));
 
@@ -72,10 +67,7 @@ public class AccountService {
     }
 
     public AccountResponse close(Integer id) {
-        Account account = accountRepository.findById(id).orElse(null);
-        if(account == null) {
-            throw new ResourceNotFoundException("Account not found");
-        }
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
         account.setStatus(AccountStatus.valueOf("CLOSED"));
 

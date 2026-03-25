@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AccountResponse {
-
     private Integer id;
     private String accountNumber;
     private String type;

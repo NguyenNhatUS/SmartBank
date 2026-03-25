@@ -35,7 +35,6 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse deposit(@Valid DepositWithDrawRequest request) {
-
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
 
         if(account == null) {
@@ -124,6 +123,9 @@ public class TransactionService {
 
         source.setBalance(source.getBalance().subtract(request.getAmount()));
         target.setBalance(target.getBalance().add(request.getAmount()));
+
+        accountRepository.save(source);
+        accountRepository.save(target);
 
         Transaction transaction = Transaction.builder()
                 .transactionCode(generateTransactionCode())

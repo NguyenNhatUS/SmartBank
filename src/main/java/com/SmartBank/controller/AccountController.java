@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     private final AccountService service;
@@ -19,25 +20,25 @@ public class AccountController {
         this.service = service;
     }
 
-    @PostMapping("/api/accounts")
+    @PostMapping()
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.create(request));
     }
 
-    @GetMapping("/api/accounts/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<AccountResponse> getAccountByID(@PathVariable Integer id) {
         return ResponseEntity.ok()
                 .body(service.getByID(id));
     }
 
-    @PatchMapping("/api/accounts/{id}/freeze")
+    @PatchMapping("/{id}/freeze")
     public ResponseEntity<AccountResponse> freezeAccount(@PathVariable Integer id) {
         return ResponseEntity.ok()
                 .body(service.freeze(id));
     }
 
-    @PatchMapping("/api/accounts/{id}/close")
+    @PatchMapping("/{id}/close")
     public ResponseEntity<AccountResponse> closeAccount(@PathVariable Integer id) {
         return ResponseEntity.ok()
                 .body(service.close(id));

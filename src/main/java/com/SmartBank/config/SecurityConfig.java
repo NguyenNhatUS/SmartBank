@@ -7,6 +7,7 @@ import com.SmartBank.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,8 +39,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/transactions/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/accounts/**").hasAnyRole("CUSTOMER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/api/accounts/my").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/accounts/my").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/accounts/my").hasRole("CUSTOMER")
+                        .requestMatchers("/api/transactions/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers("/api/accounts/**").hasAnyRole("EMPLOYEE", "ADMIN")
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

@@ -4,21 +4,20 @@ import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
 import com.SmartBank.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
 @RequestMapping("/api/accounts")
+@RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService service;
-
-    public AccountController(AccountService service) {
-        this.service = service;
-    }
 
     @PostMapping()
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountCreateRequest request) {
@@ -44,9 +43,21 @@ public class AccountController {
                 .body(service.close(id));
     }
 
-    @GetMapping("/api/accounts")
+    @GetMapping()
     public ResponseEntity<List<CustomerAccountResponse>> findAllGroupedByCustomer() {
         return ResponseEntity.ok(service.findAllGroupedByCustomer());
     }
 
+    @PostMapping("/my")
+    public ResponseEntity<AccountResponse> createMyAccount(
+            @RequestBody AccountCreateRequest request,
+            Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.createAccountForCustomer(authentication.getName(), request));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<AccountResponse>> getMyAccounts(Authentication authentication) {
+        return ResponseEntity.ok(service.getAccountsByUsername(authentication.getName()));
+    }
 }

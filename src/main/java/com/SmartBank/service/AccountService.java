@@ -11,6 +11,8 @@ import com.SmartBank.model.enums.AccountStatus;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,5 +97,28 @@ public class AccountService {
                             .build();
                 })
                 .toList();
+    }
+
+    public List<AccountResponse> getAccountsByUsername(String username) {
+        Customer customer = customerRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        return customer.getAccountList().stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    public AccountResponse createAccountForCustomer(String username, AccountCreateRequest request) {
+        Customer customer = customerRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        Account account = new Account();
+        account.setAccountNumber(generateAccountNumber());
+        account.setType(request.getType());
+        account.setBalance(BigDecimal.ZERO);
+        account.setStatus(AccountStatus.ACTIVE);
+        account.setCustomer(customer);
+
+        return mapper.toResponse(accountRepository.save(account));
     }
 }

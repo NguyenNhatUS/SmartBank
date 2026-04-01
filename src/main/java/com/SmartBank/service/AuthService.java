@@ -2,6 +2,7 @@ package com.SmartBank.service;
 
 
 import com.SmartBank.dto.request.LoginRequest;
+import com.SmartBank.dto.request.RegisterRequest;
 import com.SmartBank.dto.response.LoginResponse;
 import com.SmartBank.model.Employee;
 import com.SmartBank.repository.EmployeeRepository;
@@ -26,5 +27,20 @@ public class AuthService {
         }
         String token = jwtUtil.generateToken(employee.getUsername(), employee.getRole().name());
         return new LoginResponse(token, employee.getUsername(), employee.getRole().name());
+    }
+
+    public void register(RegisterRequest request) {
+        if(employeeRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        Employee employee = new Employee(
+                request.getUsername(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getRole(),
+                true
+        );
+
+        employeeRepository.save(employee);
     }
 }

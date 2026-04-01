@@ -20,7 +20,7 @@ public class Employee {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role; // EMPLOYEE, ADMIN
+    private Role role; // EMPLOYEE, ADMIN, CUSTOMER
 
     private boolean enabled = true;
 }

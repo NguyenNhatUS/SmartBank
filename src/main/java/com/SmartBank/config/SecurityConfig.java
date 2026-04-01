@@ -1,5 +1,7 @@
 package com.SmartBank.config;
 
+import com.SmartBank.exception.CustomAccessDeniedHandler;
+import com.SmartBank.exception.CustomAuthenticationEntryPoint;
 import com.SmartBank.filter.JwtAuthenticationFilter;
 import com.SmartBank.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,10 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -37,6 +43,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

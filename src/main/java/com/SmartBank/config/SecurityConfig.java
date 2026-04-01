@@ -1,6 +1,5 @@
 package com.SmartBank.config;
 
-
 import com.SmartBank.filter.JwtAuthenticationFilter;
 import com.SmartBank.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;

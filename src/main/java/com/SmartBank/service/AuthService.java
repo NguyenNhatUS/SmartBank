@@ -2,19 +2,24 @@ package com.SmartBank.service;
 
 
 import com.SmartBank.dto.request.LoginRequest;
+import com.SmartBank.dto.request.RefreshRequest;
 import com.SmartBank.dto.request.RegisterRequest;
 import com.SmartBank.dto.response.LoginResponse;
 import com.SmartBank.model.Customer;
 import com.SmartBank.model.Employee;
+import com.SmartBank.model.RefreshToken;
 import com.SmartBank.model.enums.Role;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
+import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -22,8 +27,12 @@ import java.util.Optional;
 public class AuthService {
     private final EmployeeRepository employeeRepository;
     private final CustomerRepository customerRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
 
     public LoginResponse login(LoginRequest request) {
         String username = request.getUsername();
@@ -47,7 +56,38 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(username, role);
-        return new LoginResponse(token, username, role);
+
+        String accessToken = jwtUtil.generateToken(username, role);
+        String refreshToken = createRefreshToken(username, role);
+
+        return new LoginResponse(accessToken, refreshToken, username, role);
+    }
+
+    public LoginResponse refresh(RefreshRequest request) {
+        RefreshToken stored = refreshTokenRepository.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        if (stored.isRevoked()) {
+            throw new RuntimeException("Refresh token has been revoked");
+        }
+
+        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(stored);
+            throw new RuntimeException("Refresh token expired");
+        }
+
+        // Revoke token cũ, cấp token mới (rotation)
+        stored.setRevoked(true);
+        refreshTokenRepository.save(stored);
+
+        String newAccessToken = jwtUtil.generateToken(stored.getUsername(), stored.getRole());
+        String newRefreshToken = createRefreshToken(stored.getUsername(), stored.getRole());
+
+        return new LoginResponse(newAccessToken, newRefreshToken, stored.getUsername(), stored.getRole());
+    }
+
+    public void logout(String username) {
+        refreshTokenRepository.deleteByUsername(username);
     }
 
     public void register(RegisterRequest request) {
@@ -72,5 +112,17 @@ public class AuthService {
             employee.setEnabled(true);
             employeeRepository.save(employee);
         }
+    }
+
+
+    private String createRefreshToken(String username, String role) {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(jwtUtil.generateRefreshToken());
+        refreshToken.setUsername(username);
+        refreshToken.setRole(role);
+        refreshToken.setExpiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000));
+        refreshToken.setRevoked(false);
+        refreshTokenRepository.save(refreshToken);
+        return refreshToken.getToken();
     }
 }

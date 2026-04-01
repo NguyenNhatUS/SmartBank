@@ -3,10 +3,13 @@ package com.SmartBank.model;
 import com.SmartBank.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +30,7 @@ public class Employee {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role; // EMPLOYEE, ADMIN, CUSTOMER
+    private Role role; // EMPLOYEE, ADMIN
 
     private boolean enabled = true;
 }

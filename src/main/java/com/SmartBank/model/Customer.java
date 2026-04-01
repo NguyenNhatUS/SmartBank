@@ -22,13 +22,13 @@ public class Customer {
     @EqualsAndHashCode.Include
     private Integer id;
 
-    @Column(nullable = false, name = "full_name", length = 1000)
+    @Column(name = "full_name", length = 1000)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, unique = true, length = 12)
+    @Column(unique = true, length = 12)
     private String phone;
 
     @Column(length = 255)
@@ -38,11 +38,19 @@ public class Customer {
     private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private CustomerStatus status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at",  updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    private boolean enabled = true;
 
     @OneToMany(
             mappedBy = "customer",

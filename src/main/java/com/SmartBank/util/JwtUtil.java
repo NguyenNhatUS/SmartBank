@@ -65,7 +65,8 @@ public class JwtUtil {
         try {
             extractAllClaims(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
+            // Thêm IllegalArgumentException để bắt case token bị null hoặc empty
             return false;
         }
     }

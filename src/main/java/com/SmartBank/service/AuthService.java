@@ -1,6 +1,6 @@
 package com.SmartBank.service;
 
-
+import com.SmartBank.dto.request.CreateEmployeeRequest;
 import com.SmartBank.dto.request.LoginRequest;
 import com.SmartBank.dto.request.RefreshRequest;
 import com.SmartBank.dto.request.RegisterRequest;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -98,20 +97,11 @@ public class AuthService {
             throw new RuntimeException("Username already exists");
         }
 
-        if (request.getRole() == Role.CUSTOMER) {
-            Customer customer = new Customer();
-            customer.setUsername(request.getUsername());
-            customer.setPassword(passwordEncoder.encode(request.getPassword()));
-            customer.setEnabled(true);
-            customerRepository.save(customer);
-        } else {
-            Employee employee = new Employee();
-            employee.setUsername(request.getUsername());
-            employee.setPassword(passwordEncoder.encode(request.getPassword()));
-            employee.setRole(request.getRole());
-            employee.setEnabled(true);
-            employeeRepository.save(employee);
-        }
+        Customer customer = new Customer();
+        customer.setUsername(request.getUsername());
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setEnabled(true);
+        customerRepository.save(customer);
     }
 
 
@@ -124,5 +114,22 @@ public class AuthService {
         refreshToken.setRevoked(false);
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
+    }
+
+    public void createEmployee(CreateEmployeeRequest request) {
+        if (request.getRole() == Role.CUSTOMER) {
+            throw new RuntimeException("Use /auth/register for customer accounts");
+        }
+
+        if (employeeRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        Employee employee = new Employee();
+        employee.setUsername(request.getUsername());
+        employee.setPassword(passwordEncoder.encode(request.getPassword()));
+        employee.setRole(request.getRole());
+        employee.setEnabled(true);
+        employeeRepository.save(employee);
     }
 }

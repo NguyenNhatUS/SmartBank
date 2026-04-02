@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 
 
 @RestController
@@ -27,9 +28,11 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
         authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(Map.of("message", "Register successful"));
     }
 
     @PostMapping("/auth/refresh")
@@ -38,9 +41,10 @@ public class AuthController {
     }
 
     @PostMapping("/api/auth/logout")
-    public ResponseEntity<Void> logout(Authentication authentication) {
+    public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
         authService.logout(authentication.getName());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .ok(Map.of("message", "Logout successful"));
     }
 
     @PostMapping("/admin/employees")

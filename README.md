@@ -68,23 +68,23 @@ src/main/java/com/smartbank/
 │   ├── ResourceNotFoundException.java
 │   └── WebException.java
 └── dto/
-    ├── request/
-    │   ├── AccountCreateRequest.java
-    │   ├── CreateEmployeeRequest.java
-    │   ├── CustomerRequest.java
-    │   ├── DepositWithDrawRequest.java
-    │   ├── LoginRequest.java
-    │   ├── RefreshRequest.java
-    │   ├── RegisterRequest.java
-    │   └── TransferRequest.java
-    ├── response/
-    │   ├── AccountResponse.java
-    │   ├── CustomerAccountResponse.java
-    │   ├── CustomerResponse.java
-    │   ├── ErrorResponse.java
-    │   ├── LoginResponse.java
-    │   └── TransactionResponse.java
-    └── SmartBankApplication.java
+│    ├── request/
+│    │   ├── AccountCreateRequest.java
+│    │   ├── CreateEmployeeRequest.java
+│    │   ├── CustomerRequest.java
+│    │   ├── DepositWithDrawRequest.java
+│    │   ├── LoginRequest.java
+│    │   ├── RefreshRequest.java
+│    │   ├── RegisterRequest.java
+│    │   └── TransferRequest.java
+│    ├── response/
+│    │   ├── AccountResponse.java
+│    │   ├── CustomerAccountResponse.java
+│    │   ├── CustomerResponse.java
+│    │   ├── ErrorResponse.java
+│    │   ├── LoginResponse.java
+│    │   └── TransactionResponse.java
+└── SmartBankApplication.java
 ```
 
 ---

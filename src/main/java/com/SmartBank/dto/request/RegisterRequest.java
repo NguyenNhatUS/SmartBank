@@ -1,6 +1,5 @@
 package com.SmartBank.dto.request;
 
-import com.SmartBank.model.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;

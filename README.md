@@ -176,3 +176,5 @@ Test coverage includes:
 
 AuthServiceTest — login, register, refresh, logout
 JwtUtilTest — generate, validate, parse token
+
+

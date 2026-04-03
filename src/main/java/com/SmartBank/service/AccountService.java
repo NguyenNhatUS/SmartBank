@@ -77,18 +77,17 @@ public class AccountService {
     }
 
     public List<CustomerAccountResponse> findAllGroupedByCustomer() {
-        return accountRepository.findAllByOrderByCustomerIdAsc()
+        // Chỉ tốn đúng 1 câu SQL duy nhất
+        return customerRepository.findAllCustomersWithAccounts()
                 .stream()
-                .collect(Collectors.groupingBy(account -> account.getCustomer()))
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    Customer customer = entry.getKey();
-                    List<AccountResponse> accountResponses = entry.getValue()
+                .map(customer -> {
+                    // Map list Account Entity sang Account Response DTO
+                    List<AccountResponse> accountResponses = customer.getAccountList()
                             .stream()
                             .map(mapper::toResponse)
                             .toList();
 
+                    // Map Customer Entity sang CustomerAccountResponse
                     return CustomerAccountResponse.builder()
                             .customerId(customer.getId())
                             .customerName(customer.getFullName())

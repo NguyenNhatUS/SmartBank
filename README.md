@@ -19,45 +19,74 @@ A mini banking REST API built with **Java Spring Boot**, implementing full authe
 
 ```
 src/main/java/com/smartbank/
+│
 ├── config/
 │   └── SecurityConfig.java
+│
 ├── controller/
 │   ├── AccountController.java
 │   ├── AuthController.java
 │   ├── CustomerController.java
 │   └── TransactionController.java
+│
 ├── service/
 │   ├── AccountService.java
-│   ├──CustomUserDetailsService.java
+│   ├── AuthService.java
+│   ├── CustomUserDetailsService.java
 │   ├── CustomerService.java
-│   ├── TransactionService.java
-│   └── AuthService.java
-├── util/
-│   └── JwtUtil.java
+│   └── TransactionService.java
+│
+├── repository/
+│   ├── AccountRepository.java
+│   ├── CustomerRepository.java
+│   ├── EmployeeRepository.java
+│   ├── RefreshTokenRepository.java
+│   └── TransactionRepository.java
+│
 ├── model/
 │   ├── enums/
-│       ├── AccountStatus.java
-│       ├── AccountType.java
-│       ├── CustomerStatus.java
-│       ├── Role.java
-│       └── TransactionType.java
-│   ├── Employee.java
-│   ├── Customer.java
+│   │   ├── AccountStatus.java
+│   │   ├── AccountType.java
+│   │   ├── CustomerStatus.java
+│   │   ├── Role.java
+│   │   └── TransactionType.java
+│   │
 │   ├── Account.java
-│   ├── Transaction.java
-│   └── RefreshToken.java
-├── repository/
-│   ├── EmployeeRepository.java
-│   ├── CustomerRepository.java
-│   ├── AccountRepository.java
-│   ├── TransactionRepository.java
-│   └── RefreshTokenRepository.java
+│   ├── Customer.java
+│   ├── Employee.java
+│   ├── RefreshToken.java
+│   └── Transaction.java
+│
+├── dto/
+│   ├── request/
+│   │   ├── AccountCreateRequest.java
+│   │   ├── CreateEmployeeRequest.java
+│   │   ├── CustomerRequest.java
+│   │   ├── DepositWithDrawRequest.java
+│   │   ├── LoginRequest.java
+│   │   ├── RefreshRequest.java
+│   │   ├── RegisterRequest.java
+│   │   └── TransferRequest.java
+│   │
+│   └── response/
+│       ├── AccountResponse.java
+│       ├── CustomerAccountResponse.java
+│       ├── CustomerResponse.java
+│       ├── ErrorResponse.java
+│       ├── LoginResponse.java
+│       └── TransactionResponse.java
+│
 ├── mapper/
 │   ├── AccountMapper.java
 │   ├── CustomerMapper.java
 │   └── TransactionMapper.java
+│
 ├── filter/
 │   └── JwtAuthenticationFilter.java
+│
+├── util/
+│   └── JwtUtil.java
+│
 ├── exception/
 │   ├── AccountNotActiveException.java
 │   ├── CustomAccessDeniedHandler.java
@@ -67,23 +96,7 @@ src/main/java/com/smartbank/
 │   ├── InsufficientFundsException.java
 │   ├── ResourceNotFoundException.java
 │   └── WebException.java
-└── dto/
-│    ├── request/
-│    │   ├── AccountCreateRequest.java
-│    │   ├── CreateEmployeeRequest.java
-│    │   ├── CustomerRequest.java
-│    │   ├── DepositWithDrawRequest.java
-│    │   ├── LoginRequest.java
-│    │   ├── RefreshRequest.java
-│    │   ├── RegisterRequest.java
-│    │   └── TransferRequest.java
-│    ├── response/
-│    │   ├── AccountResponse.java
-│    │   ├── CustomerAccountResponse.java
-│    │   ├── CustomerResponse.java
-│    │   ├── ErrorResponse.java
-│    │   ├── LoginResponse.java
-│    │   └── TransactionResponse.java
+│
 └── SmartBankApplication.java
 ```
 

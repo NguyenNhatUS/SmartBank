@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 
@@ -22,17 +21,17 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
-    }
-
     @PostMapping("/auth/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(Map.of("message", "Register successful"));
+    }
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/auth/refresh")

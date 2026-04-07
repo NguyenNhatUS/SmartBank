@@ -107,11 +107,7 @@ public class TransactionService {
             throw new ResourceNotFoundException("Account not found");
         }
 
-        if(source.getStatus() != AccountStatus.ACTIVE) {
-            throw new AccountNotActiveException("Account is not ACTIVE");
-        }
-
-        if(target.getStatus() != AccountStatus.ACTIVE) {
+        if(source.getStatus() != AccountStatus.ACTIVE || target.getStatus() != AccountStatus.ACTIVE) {
             throw new AccountNotActiveException("Account is not ACTIVE");
         }
 

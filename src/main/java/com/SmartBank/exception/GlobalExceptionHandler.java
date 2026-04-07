@@ -7,7 +7,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -54,13 +53,12 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        ErrorResponse error = new ErrorResponse(500,
+        ErrorResponse error = new ErrorResponse(
+                500,
                 "System Error, try later",
                 request.getRequestURI(),
                 LocalDateTime.now());
 
         return ResponseEntity.status(400).body(error);
     }
-
-
 }

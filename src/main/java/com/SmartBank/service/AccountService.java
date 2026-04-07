@@ -11,10 +11,8 @@ import com.SmartBank.model.enums.AccountStatus;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service

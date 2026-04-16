@@ -36,11 +36,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Generate Refresh token
-    public String generateRefreshToken() {
-        return UUID.randomUUID().toString();
-    }
-
     // Extract claim tu token
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
@@ -69,6 +64,11 @@ public class JwtUtil {
             // Thêm IllegalArgumentException để bắt case token bị null hoặc empty
             return false;
         }
+    }
+
+    // Generate Refresh token
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
 }

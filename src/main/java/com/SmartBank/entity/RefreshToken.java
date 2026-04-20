@@ -1,6 +1,7 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Builder
 public class RefreshToken {
 
     @Id

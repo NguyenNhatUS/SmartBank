@@ -1,7 +1,7 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.AccountStatus;
-import com.SmartBank.model.enums.AccountType;
+import com.SmartBank.entity.enums.AccountStatus;
+import com.SmartBank.entity.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 

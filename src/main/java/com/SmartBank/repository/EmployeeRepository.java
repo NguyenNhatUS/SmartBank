@@ -1,6 +1,6 @@
 package com.SmartBank.repository;
 
-import com.SmartBank.model.Employee;
+import com.SmartBank.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

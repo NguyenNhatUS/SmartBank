@@ -1,6 +1,6 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.CustomerStatus;
+import com.SmartBank.entity.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;

@@ -1,9 +1,7 @@
 package com.SmartBank.mapper;
 
-import com.SmartBank.dto.request.DepositWithDrawRequest;
 import com.SmartBank.dto.response.TransactionResponse;
-import com.SmartBank.model.Transaction;
-import com.SmartBank.model.enums.TransactionType;
+import com.SmartBank.entity.Transaction;
 import org.springframework.stereotype.Component;
 
 @Component

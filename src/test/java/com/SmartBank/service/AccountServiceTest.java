@@ -5,10 +5,10 @@ import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
-import com.SmartBank.model.Account;
-import com.SmartBank.model.Customer;
-import com.SmartBank.model.enums.AccountStatus;
-import com.SmartBank.model.enums.AccountType;
+import com.SmartBank.entity.Account;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.enums.AccountStatus;
+import com.SmartBank.entity.enums.AccountType;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,7 +123,7 @@ class AccountServiceTest {
 
         when(mapper.toResponse(account)).thenReturn(response);
 
-        AccountResponse result = service.getByID(1);
+        AccountResponse result = service.getByID(1L);
 
         assertEquals(result.getBalance(), response.getBalance());
 

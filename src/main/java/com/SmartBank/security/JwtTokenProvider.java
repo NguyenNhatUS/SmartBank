@@ -1,4 +1,4 @@
-package com.SmartBank.util;
+package com.SmartBank.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Component
-public class JwtUtil {
+public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 

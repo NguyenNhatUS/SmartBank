@@ -1,15 +1,15 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.Role;
+import com.SmartBank.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

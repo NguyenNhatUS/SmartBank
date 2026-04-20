@@ -1,6 +1,6 @@
 package com.SmartBank.dto.request;
 
-import com.SmartBank.model.enums.Role;
+import com.SmartBank.entity.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
 

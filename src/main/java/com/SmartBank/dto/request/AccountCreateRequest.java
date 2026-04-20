@@ -1,6 +1,6 @@
 package com.SmartBank.dto.request;
 
-import com.SmartBank.model.enums.AccountType;
+import com.SmartBank.entity.enums.AccountType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 

@@ -5,8 +5,8 @@ import com.SmartBank.dto.response.CustomerResponse;
 import com.SmartBank.exception.DuplicateResourceException;
 import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.CustomerMapper;
-import com.SmartBank.model.Customer;
-import com.SmartBank.model.enums.CustomerStatus;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,12 +92,12 @@ class CustomerServiceTest {
         when(customerMapper.toResponse(customer)).thenReturn(response);
 
         // Act
-        CustomerResponse result = service.getById(1);
+        CustomerResponse result = service.getById(1L);
 
         // Assert
         assert(result.getFullName()).equals(response.getFullName());
 
-        verify(customerRepository, times(1)).findById(1);
+        verify(customerRepository, times(1)).findById(1L);
 
         verify(customerMapper, times(1)).toResponse(customer);
     }
@@ -128,7 +128,7 @@ class CustomerServiceTest {
     public void getById_shouldThrow_whenCustomerNotFound() {
         when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.getById(99))
+        assertThatThrownBy(() -> service.getById(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
     }
@@ -137,7 +137,7 @@ class CustomerServiceTest {
     public void deleteById_shouldThrow_whenCustomerNotFound() {
         when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.deleteById(99))
+        assertThatThrownBy(() -> service.deleteById(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("not found");
     }
@@ -146,7 +146,7 @@ class CustomerServiceTest {
     public void deleteById_shouldLockCustomer_whenExists() {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
 
-        service.deleteById(1);
+        service.deleteById(1L);
 
         assertEquals(customer.getStatus(), CustomerStatus.LOCKED);
 

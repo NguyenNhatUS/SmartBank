@@ -1,6 +1,6 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.TransactionType;
+import com.SmartBank.entity.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 

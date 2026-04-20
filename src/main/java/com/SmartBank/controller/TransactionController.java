@@ -5,6 +5,7 @@ import com.SmartBank.dto.request.TransferRequest;
 import com.SmartBank.dto.response.TransactionResponse;
 import com.SmartBank.service.TransactionService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,13 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
+@RequiredArgsConstructor
 public class TransactionController {
 
     private final TransactionService service;
-
-    public TransactionController(TransactionService service) {
-        this.service = service;
-    }
 
     @PostMapping("/deposit")
     public ResponseEntity<TransactionResponse> deposit(@Valid @RequestBody DepositWithDrawRequest request) {

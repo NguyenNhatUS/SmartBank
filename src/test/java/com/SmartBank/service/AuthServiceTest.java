@@ -11,7 +11,7 @@ import com.SmartBank.entity.enums.Role;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
-import com.SmartBank.util.JwtUtil;
+import com.SmartBank.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +33,7 @@ class AuthServiceTest {
     @Mock private CustomerRepository customerRepository;
     @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtUtil jwtUtil;
+    @Mock private JwtTokenProvider jwtUtil;
 
     @InjectMocks
     private AuthService authService;

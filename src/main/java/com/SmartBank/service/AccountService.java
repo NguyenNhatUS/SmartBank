@@ -52,13 +52,13 @@ public class AccountService {
         return accountNumber;
     }
 
-    public AccountResponse getByID(Integer id) {
+    public AccountResponse getByID(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         return mapper.toResponse(account);
     }
 
-    public AccountResponse freeze(Integer id) {
+    public AccountResponse freeze(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         account.setStatus(AccountStatus.valueOf("FROZEN"));
@@ -66,7 +66,7 @@ public class AccountService {
         return mapper.toResponse(accountRepository.save(account));
     }
 
-    public AccountResponse close(Integer id) {
+    public AccountResponse close(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
         account.setStatus(AccountStatus.valueOf("CLOSED"));

@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AccountResponse {
-    private Integer id;
+    private Long id;
     private String accountNumber;
     private String type;
     private BigDecimal balance;
     private String status;
     private LocalDateTime createdAt;
 
-    private Integer customerId;
+    private Long customerId;
     private String customerName;
 }

@@ -1,6 +1,5 @@
-package com.SmartBank.filter;
+package com.SmartBank.security;
 
-import com.SmartBank.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtUtil;
 
     @Override
     protected void doFilterInternal(

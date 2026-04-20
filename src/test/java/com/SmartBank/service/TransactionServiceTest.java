@@ -48,14 +48,14 @@ class TransactionServiceTest {
     @BeforeEach
     void setUp() {
         sourceAccount = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("1234567890")
                 .balance(new BigDecimal("1000000"))
                 .status(AccountStatus.ACTIVE)
                 .build();
 
         targetAccount = Account.builder()
-                .id(2)
+                .id(2L)
                 .accountNumber("0123456789")
                 .balance(new BigDecimal("500000"))
                 .status(AccountStatus.ACTIVE)

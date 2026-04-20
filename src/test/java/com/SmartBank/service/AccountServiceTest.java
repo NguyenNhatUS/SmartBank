@@ -53,12 +53,12 @@ class AccountServiceTest {
     void setUp() {
         customer = Customer
                 .builder()
-                .id(1)
+                .id(1L)
                 .fullName("Nhat")
                 .build();
 
         account = Account.builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("01234")
                 .type(AccountType.SAVINGS)
                 .balance(BigDecimal.valueOf(10000))
@@ -75,12 +75,12 @@ class AccountServiceTest {
 
         response = AccountResponse
                 .builder()
-                .id(1)
+                .id(1L)
                 .accountNumber("01234")
                 .type(String.valueOf(AccountType.SAVINGS))
                 .balance(BigDecimal.valueOf(100000))
                 .status(String.valueOf(AccountStatus.ACTIVE))
-                .customerId(1)
+                .customerId(1L)
                 .customerName("Nhat")
                 .build();
     }
@@ -108,9 +108,9 @@ class AccountServiceTest {
 
     @Test
     public void create_shouldThrown_whenCustomerNotFound() {
-        request.setCustomerId(99);
+        request.setCustomerId(99L);
 
-        when(customerRepository.findById(99)).thenReturn(Optional.empty());
+        when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(request))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -119,11 +119,11 @@ class AccountServiceTest {
 
     @Test
     public void getById_shouldReturnResponse_whenExists() {
-        when(accountRepository.findById(1)).thenReturn(Optional.of(account));
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
         when(mapper.toResponse(account)).thenReturn(response);
 
-        AccountResponse result = service.getByID(1);
+        AccountResponse result = service.getByID(1L);
 
         assertEquals(result.getBalance(), response.getBalance());
 

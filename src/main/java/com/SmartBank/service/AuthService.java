@@ -13,7 +13,7 @@ import com.SmartBank.entity.enums.Role;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
-import com.SmartBank.util.JwtUtil;
+import com.SmartBank.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +29,7 @@ public class AuthService {
     private final CustomerRepository customerRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtUtil;
 
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;

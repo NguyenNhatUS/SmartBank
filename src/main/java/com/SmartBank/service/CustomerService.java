@@ -55,7 +55,7 @@ public class CustomerService {
     }
 
     @Cacheable(value = "customers", key = "#id")
-    public CustomerResponse getById(Integer id) {
+    public CustomerResponse getById(Long id) {
         // This method only run when Cache MISS
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
@@ -64,7 +64,7 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
@@ -73,7 +73,7 @@ public class CustomerService {
         repository.deleteById(id);
     }
 
-    public CustomerResponse update(Integer id, CustomerRequest request) {
+    public CustomerResponse update(Long id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
@@ -88,7 +88,7 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    public @Nullable List<AccountResponse> getAccountsByID(Integer id) {
+    public @Nullable List<AccountResponse> getAccountsByID(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");

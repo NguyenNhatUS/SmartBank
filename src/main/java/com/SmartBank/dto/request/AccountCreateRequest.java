@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class AccountCreateRequest {
     @NotNull(message = "CustomerID can not be null")
-    private Integer customerId;
+    private Long customerId;
 
     @NotNull(message = "Type can not be null")
     private AccountType type;

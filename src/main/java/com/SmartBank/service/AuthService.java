@@ -16,6 +16,8 @@ import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -60,7 +62,13 @@ public class AuthService {
         String accessToken = jwtUtil.generateToken(username, role);
         String refreshToken = createRefreshToken(username, role);
 
-        return new LoginResponse(accessToken, refreshToken, username, role);
+        return LoginResponse
+                .builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .username(username)
+                .role(role)
+                .build();
     }
 
     public LoginResponse refresh(RefreshRequest request) {
@@ -83,7 +91,13 @@ public class AuthService {
         String newAccessToken = jwtUtil.generateToken(stored.getUsername(), stored.getRole());
         String newRefreshToken = createRefreshToken(stored.getUsername(), stored.getRole());
 
-        return new LoginResponse(newAccessToken, newRefreshToken, stored.getUsername(), stored.getRole());
+        return LoginResponse
+                .builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .username(stored.getUsername())
+                .role(stored.getRole())
+                .build();
     }
 
     public void logout(String username) {
@@ -98,21 +112,27 @@ public class AuthService {
             throw new DuplicateResourceException("Username already exists");
         }
 
-        Customer customer = new Customer();
-        customer.setUsername(request.getUsername());
-        customer.setPassword(passwordEncoder.encode(request.getPassword()));
-        customer.setEnabled(true);
+        Customer customer = Customer
+                .builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .enabled(true)
+                .build();
+
         customerRepository.save(customer);
     }
 
 
     private String createRefreshToken(String username, String role) {
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setToken(jwtUtil.generateRefreshToken());
-        refreshToken.setUsername(username);
-        refreshToken.setRole(role);
-        refreshToken.setExpiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000));
-        refreshToken.setRevoked(false);
+        RefreshToken refreshToken = RefreshToken
+                .builder()
+                .token(jwtUtil.generateRefreshToken())
+                .username(username)
+                .role(role)
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000))
+                .revoked(false)
+                .build();
+
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }
@@ -126,11 +146,14 @@ public class AuthService {
             throw new RuntimeException("Username already exists");
         }
 
-        Employee employee = new Employee();
-        employee.setUsername(request.getUsername());
-        employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        employee.setRole(request.getRole());
-        employee.setEnabled(true);
+        Employee employee = Employee
+                .builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole())
+                .enabled(true)
+                .build();
+
         employeeRepository.save(employee);
     }
 }

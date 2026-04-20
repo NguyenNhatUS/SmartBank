@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CustomerRequest {
     @NotBlank(message = "FullName can not be null")

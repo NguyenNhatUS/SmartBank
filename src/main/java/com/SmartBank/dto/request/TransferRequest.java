@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class TransferRequest {
     @NotBlank(message = "Account can not be null")

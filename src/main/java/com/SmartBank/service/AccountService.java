@@ -10,6 +10,7 @@ import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.AccountStatus;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
@@ -52,6 +53,7 @@ public class AccountService {
         return accountNumber;
     }
 
+    @Cacheable(value = "accounts", key = "#id")
     public AccountResponse getByID(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
@@ -75,17 +77,14 @@ public class AccountService {
     }
 
     public List<CustomerAccountResponse> findAllGroupedByCustomer() {
-        // Chỉ tốn đúng 1 câu SQL duy nhất
         return customerRepository.findAllCustomersWithAccounts()
                 .stream()
                 .map(customer -> {
-                    // Map list Account Entity sang Account Response DTO
                     List<AccountResponse> accountResponses = customer.getAccountList()
                             .stream()
                             .map(mapper::toResponse)
                             .toList();
 
-                    // Map Customer Entity sang CustomerAccountResponse
                     return CustomerAccountResponse.builder()
                             .customerId(customer.getId())
                             .customerName(customer.getFullName())
@@ -96,6 +95,7 @@ public class AccountService {
                 .toList();
     }
 
+    @Cacheable(value = "accounts_list")
     public List<AccountResponse> getAccountsByUsername(String username) {
         Customer customer = customerRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));

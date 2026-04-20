@@ -11,7 +11,9 @@ import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
-import org.jspecify.annotations.Nullable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +48,7 @@ public class CustomerService {
         return customerMapper.toResponse(savedCustomer);
     }
 
+    @Cacheable(value = "customers_list")
     public List<CustomerResponse> getAllCustomers() {
         return repository.findAll()
                 .stream()
@@ -53,6 +56,7 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "customers", key = "#id", condition = "#id > 0")
     public CustomerResponse getById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
@@ -61,6 +65,7 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
+    @CacheEvict(value = "customers", key = "#id")
     public void deleteById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
@@ -70,6 +75,7 @@ public class CustomerService {
         repository.deleteById(id);
     }
 
+    @CachePut(value = "customers", key = "#id")
     public CustomerResponse update(Long id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
@@ -85,7 +91,8 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    public @Nullable List<AccountResponse> getAccountsByID(Long id) {
+    @Cacheable(value = "accounts_customer", key = "#id")
+    public List<AccountResponse> getAccountsByID(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");

@@ -7,9 +7,9 @@ import com.SmartBank.exception.DuplicateResourceException;
 import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
-import com.SmartBank.model.Account;
-import com.SmartBank.model.Customer;
-import com.SmartBank.model.enums.CustomerStatus;
+import com.SmartBank.entity.Account;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public CustomerResponse getById(Integer id) {
+    public CustomerResponse getById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
@@ -61,7 +61,7 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
@@ -70,7 +70,7 @@ public class CustomerService {
         repository.deleteById(id);
     }
 
-    public CustomerResponse update(Integer id, CustomerRequest request) {
+    public CustomerResponse update(Long id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");
@@ -85,7 +85,7 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    public @Nullable List<AccountResponse> getAccountsByID(Integer id) {
+    public @Nullable List<AccountResponse> getAccountsByID(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");

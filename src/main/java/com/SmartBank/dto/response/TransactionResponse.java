@@ -1,6 +1,6 @@
 package com.SmartBank.dto.response;
 
-import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionResponse {
 
-    private Integer id;
+    private Long id;
     private String transactionCode;
     private String type;
     private BigDecimal amount;

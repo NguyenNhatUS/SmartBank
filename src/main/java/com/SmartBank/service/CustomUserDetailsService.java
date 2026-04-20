@@ -2,6 +2,8 @@ package com.SmartBank.service;
 
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
+import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.AppException;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         Customer customer = customerRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         return User.builder()
                 .username(customer.getUsername())

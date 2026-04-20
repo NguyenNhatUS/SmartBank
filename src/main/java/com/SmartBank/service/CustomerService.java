@@ -3,8 +3,8 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.exception.DuplicateResourceException;
-import com.SmartBank.exception.ResourceNotFoundException;
+import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.AppException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.entity.Account;
@@ -36,11 +36,11 @@ public class CustomerService {
     public CustomerResponse create(CustomerRequest request) {
 
         if(repository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("Email can not be duplicated");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         if(repository.existsByPhone(request.getPhone())) {
-            throw new DuplicateResourceException("Phone can not be duplicated");
+            throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
         }
 
         Customer customer = customerMapper.toEntity(request);
@@ -60,7 +60,7 @@ public class CustomerService {
     public CustomerResponse getById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new ResourceNotFoundException("Customer not found");
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
         }
         return customerMapper.toResponse(customer);
     }
@@ -69,7 +69,7 @@ public class CustomerService {
     public void deleteById(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new ResourceNotFoundException("Customer not found");
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
         }
         customer.setStatus(CustomerStatus.LOCKED);
         repository.deleteById(id);
@@ -79,7 +79,7 @@ public class CustomerService {
     public CustomerResponse update(Long id, CustomerRequest request) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new ResourceNotFoundException("Customer not found");
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
         }
 
         customer.setFullName(request.getFullName());
@@ -95,7 +95,7 @@ public class CustomerService {
     public List<AccountResponse> getAccountsByID(Long id) {
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
-            throw new ResourceNotFoundException("Customer not found");
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
         }
 
         List<Account> accountList = customer.getAccountList();

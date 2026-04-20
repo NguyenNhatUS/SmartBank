@@ -3,7 +3,8 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
-import com.SmartBank.exception.ResourceNotFoundException;
+import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.AppException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
@@ -34,7 +35,7 @@ public class AccountService {
 
     public AccountResponse create(AccountCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
-                () -> new ResourceNotFoundException("Customer not found")
+                () -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND)
         );
 
         Account account = mapper.toEntity(request, customer);
@@ -55,13 +56,13 @@ public class AccountService {
 
     @Cacheable(value = "accounts", key = "#id")
     public AccountResponse getByID(Long id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         return mapper.toResponse(account);
     }
 
     public AccountResponse freeze(Long id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         account.setStatus(AccountStatus.valueOf("FROZEN"));
 
@@ -69,7 +70,7 @@ public class AccountService {
     }
 
     public AccountResponse close(Long id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+        Account account = accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         account.setStatus(AccountStatus.valueOf("CLOSED"));
 
@@ -98,7 +99,7 @@ public class AccountService {
     @Cacheable(value = "accounts_list")
     public List<AccountResponse> getAccountsByUsername(String username) {
         Customer customer = customerRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         return customer.getAccountList().stream()
                 .map(mapper::toResponse)
@@ -107,7 +108,7 @@ public class AccountService {
 
     public AccountResponse createAccountForCustomer(String username, AccountCreateRequest request) {
         Customer customer = customerRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         Account account = new Account();
         account.setAccountNumber(generateAccountNumber());

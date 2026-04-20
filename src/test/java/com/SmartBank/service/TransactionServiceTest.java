@@ -3,8 +3,6 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.DepositWithDrawRequest;
 import com.SmartBank.dto.request.TransferRequest;
 import com.SmartBank.dto.response.TransactionResponse;
-import com.SmartBank.exception.AccountNotActiveException;
-import com.SmartBank.exception.InsufficientFundsException;
 import com.SmartBank.mapper.TransactionMapper;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.enums.AccountStatus;

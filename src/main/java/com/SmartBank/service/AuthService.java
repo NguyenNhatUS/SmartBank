@@ -5,11 +5,12 @@ import com.SmartBank.dto.request.LoginRequest;
 import com.SmartBank.dto.request.RefreshRequest;
 import com.SmartBank.dto.request.RegisterRequest;
 import com.SmartBank.dto.response.LoginResponse;
-import com.SmartBank.exception.DuplicateResourceException;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
 import com.SmartBank.entity.RefreshToken;
+import com.SmartBank.entity.enums.ErrorCode;
 import com.SmartBank.entity.enums.Role;
+import com.SmartBank.exception.AppException;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
@@ -107,7 +108,7 @@ public class AuthService {
         boolean existsInCustomer = customerRepository.findByUsername(request.getUsername()).isPresent();
 
         if (existsInEmployee || existsInCustomer) {
-            throw new DuplicateResourceException("Username already exists");
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         Customer customer = Customer

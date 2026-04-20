@@ -2,8 +2,6 @@ package com.SmartBank.service;
 
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.exception.DuplicateResourceException;
-import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;

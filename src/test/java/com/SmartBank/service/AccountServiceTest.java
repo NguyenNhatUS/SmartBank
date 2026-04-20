@@ -3,7 +3,6 @@ package com.SmartBank.service;
 
 import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
-import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;

@@ -1,6 +1,7 @@
 package com.SmartBank.exception;
 
 import com.SmartBank.dto.response.ErrorResponse;
+import com.SmartBank.entity.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,20 +14,19 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(WebException.class)
+    @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleWebException(
-            WebException ex,
+            AppException ex,
             HttpServletRequest request
     ) {
 
-        ErrorResponse error = new ErrorResponse(
-                ex.getStatusCode(),
-                ex.getMessage(),
-                request.getRequestURI(),
-                LocalDateTime.now()
-        );
+        ErrorCode errorCode = ex.getErrorCode();
 
-        return ResponseEntity.status(ex.getStatusCode()).body(error);
+        ErrorResponse errorResponse = ErrorResponse.of(errorCode, request.getRequestURI());
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

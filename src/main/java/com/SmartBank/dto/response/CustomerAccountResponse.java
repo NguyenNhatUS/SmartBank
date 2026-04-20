@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CustomerAccountResponse {
-    private Integer customerId;
+    private Long customerId;
 
     private String customerName;
 

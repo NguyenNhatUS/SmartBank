@@ -28,7 +28,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponse> getCustomerByID(@PathVariable Integer id) {
+    public ResponseEntity<CustomerResponse> getCustomerByID(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .body(service.getById(id));
     }
@@ -40,19 +40,19 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponse> update(@PathVariable Integer id, @RequestBody CustomerRequest request) {
+    public ResponseEntity<CustomerResponse> update(@PathVariable Long id, @RequestBody CustomerRequest request) {
         CustomerResponse response = service.update(id, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/accounts")
-    public ResponseEntity<List<AccountResponse>> getAccountsByID(@PathVariable Integer id) {
+    public ResponseEntity<List<AccountResponse>> getAccountsByID(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .body(service.getAccountsByID(id));
     }

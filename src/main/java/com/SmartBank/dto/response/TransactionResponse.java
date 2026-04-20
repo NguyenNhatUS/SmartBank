@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TransactionResponse {
 
-    private Integer id;
+    private Long id;
     private String transactionCode;
     private String type;
     private BigDecimal amount;

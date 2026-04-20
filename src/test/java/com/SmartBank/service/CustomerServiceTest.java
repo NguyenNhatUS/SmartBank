@@ -48,7 +48,7 @@ class CustomerServiceTest {
                 .build();
 
         customer = Customer.builder()
-                .id(1)
+                .id(1L)
                 .fullName("Nguyen Van A")
                 .email("a@gmail.com")
                 .phone("0901234567")
@@ -56,7 +56,7 @@ class CustomerServiceTest {
                 .build();
 
         response = CustomerResponse.builder()
-                .id(1)
+                .id(1L)
                 .fullName("Nguyen Van A")
                 .email("a@gmail.com")
                 .build();
@@ -87,7 +87,7 @@ class CustomerServiceTest {
     @Test
     public void geById_shouldReturnResponse_whenExists() {
         // Arrange
-        when(customerRepository.findById(1)).thenReturn(Optional.of(customer));
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
 
         when(customerMapper.toResponse(customer)).thenReturn(response);
 
@@ -126,7 +126,7 @@ class CustomerServiceTest {
 
     @Test
     public void getById_shouldThrow_whenCustomerNotFound() {
-        when(customerRepository.findById(99)).thenReturn(Optional.empty());
+        when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getById(99))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -135,7 +135,7 @@ class CustomerServiceTest {
 
     @Test
     public void deleteById_shouldThrow_whenCustomerNotFound() {
-        when(customerRepository.findById(99)).thenReturn(Optional.empty());
+        when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.deleteById(99))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -144,13 +144,13 @@ class CustomerServiceTest {
 
     @Test
     public void deleteById_shouldLockCustomer_whenExists() {
-        when(customerRepository.findById(1)).thenReturn(Optional.of(customer));
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
 
         service.deleteById(1);
 
         assertEquals(customer.getStatus(), CustomerStatus.LOCKED);
 
-        verify(customerRepository, times(1)).deleteById(1);
+        verify(customerRepository, times(1)).deleteById(1L);
 
     }
 

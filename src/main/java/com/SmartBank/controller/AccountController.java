@@ -26,19 +26,19 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountResponse> getAccountByID(@PathVariable Integer id) {
+    public ResponseEntity<AccountResponse> getAccountByID(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .body(service.getByID(id));
     }
 
     @PatchMapping("/{id}/freeze")
-    public ResponseEntity<AccountResponse> freezeAccount(@PathVariable Integer id) {
+    public ResponseEntity<AccountResponse> freezeAccount(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .body(service.freeze(id));
     }
 
     @PatchMapping("/{id}/close")
-    public ResponseEntity<AccountResponse> closeAccount(@PathVariable Integer id) {
+    public ResponseEntity<AccountResponse> closeAccount(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .body(service.close(id));
     }

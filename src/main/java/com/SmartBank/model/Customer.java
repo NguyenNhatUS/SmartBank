@@ -20,7 +20,7 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Integer id;
+    private Long id;
 
     @Column(name = "full_name", length = 1000)
     private String fullName;

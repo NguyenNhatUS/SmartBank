@@ -1,4 +1,4 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;

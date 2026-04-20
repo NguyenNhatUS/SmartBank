@@ -1,7 +1,6 @@
 package com.SmartBank.dto.request;
 
 
-import com.SmartBank.model.Account;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

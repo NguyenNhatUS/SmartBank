@@ -1,7 +1,7 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.AccountStatus;
-import com.SmartBank.model.enums.AccountType;
+import com.SmartBank.entity.enums.AccountStatus;
+import com.SmartBank.entity.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "account_number", nullable = false, unique = true, length = 25, updatable = false)
     private String accountNumber;

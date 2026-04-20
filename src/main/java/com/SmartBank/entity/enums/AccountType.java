@@ -1,4 +1,4 @@
-package com.SmartBank.model.enums;
+package com.SmartBank.entity.enums;
 
 public enum AccountType {
     SAVINGS,

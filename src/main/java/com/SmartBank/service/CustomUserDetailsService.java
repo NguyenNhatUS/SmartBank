@@ -1,7 +1,7 @@
 package com.SmartBank.service;
 
-import com.SmartBank.model.Customer;
-import com.SmartBank.model.Employee;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.Employee;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;

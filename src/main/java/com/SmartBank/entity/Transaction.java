@@ -1,6 +1,6 @@
-package com.SmartBank.model;
+package com.SmartBank.entity;
 
-import com.SmartBank.model.enums.TransactionType;
+import com.SmartBank.entity.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "transaction_code", nullable = false, unique = true, length = 25, updatable = false)
     private String transactionCode;

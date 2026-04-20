@@ -2,7 +2,7 @@ package com.SmartBank.mapper;
 
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.model.Customer;
+import com.SmartBank.entity.Customer;
 import org.springframework.stereotype.Component;
 
 @Component

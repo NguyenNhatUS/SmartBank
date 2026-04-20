@@ -7,11 +7,12 @@ import com.SmartBank.exception.DuplicateResourceException;
 import com.SmartBank.exception.ResourceNotFoundException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
-import com.SmartBank.model.Account;
-import com.SmartBank.model.Customer;
-import com.SmartBank.model.enums.CustomerStatus;
+import com.SmartBank.entity.Account;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
 import org.jspecify.annotations.Nullable;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +54,9 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "customers", key = "#id")
     public CustomerResponse getById(Integer id) {
+        // This method only run when Cache MISS
         Customer customer = repository.findById(id).orElse(null);
         if(customer == null) {
             throw new ResourceNotFoundException("Customer not found");

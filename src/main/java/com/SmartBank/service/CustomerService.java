@@ -11,6 +11,7 @@ import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository repository;
@@ -26,12 +28,6 @@ public class CustomerService {
     private final CustomerMapper customerMapper;
 
     private final AccountMapper accountMapper;
-
-    public CustomerService(CustomerRepository repository, CustomerMapper customerMapper, AccountMapper accountMapper) {
-        this.repository = repository;
-        this.customerMapper = customerMapper;
-        this.accountMapper = accountMapper;
-    }
 
     public CustomerResponse create(CustomerRequest request) {
 
@@ -48,7 +44,7 @@ public class CustomerService {
         return customerMapper.toResponse(savedCustomer);
     }
 
-    @Cacheable(value = "customers_list")
+    @Cacheable(value = "customers")
     public List<CustomerResponse> getAllCustomers() {
         return repository.findAll()
                 .stream()
@@ -91,9 +87,9 @@ public class CustomerService {
         return customerMapper.toResponse(customer);
     }
 
-    @Cacheable(value = "accounts_customer", key = "#id")
-    public List<AccountResponse> getAccountsByID(Long id) {
-        Customer customer = repository.findById(id).orElse(null);
+    @Cacheable(value = "accounts_customers", key = "#customerId")
+    public List<AccountResponse> getAccountsByID(Long customerId) {
+        Customer customer = repository.findById(customerId).orElse(null);
         if(customer == null) {
             throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
         }

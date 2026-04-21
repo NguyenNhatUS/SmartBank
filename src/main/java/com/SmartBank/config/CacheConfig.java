@@ -31,19 +31,18 @@ public class CacheConfig {
         // TTL riêng cho từng cache
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
 
-        // Tỷ giá hối đoái — thay đổi theo giờ → TTL ngắn
-        cacheConfigs.put("exchangeRates",
+        cacheConfigs.put("accounts",
                 defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
         // Thông tin khách hàng — ít thay đổi → TTL dài hơn
         cacheConfigs.put("customers",
                 defaultConfig.entryTtl(Duration.ofMinutes(30)));
 
-        // Loại tài khoản (SAVINGS, CHECKING...) — gần như không đổi
-        cacheConfigs.put("accountTypes",
-                defaultConfig.entryTtl(Duration.ofHours(24)));
+        cacheConfigs.put("accounts_customers",
+                defaultConfig.entryTtl(Duration.ofMinutes(10)));
 
-        return RedisCacheManager.builder(connectionFactory)
+        return RedisCacheManager
+                .builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigs)
                 .build();

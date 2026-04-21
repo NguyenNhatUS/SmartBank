@@ -32,7 +32,6 @@ public class AccountService {
         this.customerRepository = customerRepository;
     }
 
-
     public AccountResponse create(AccountCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
                 () -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND)
@@ -96,7 +95,7 @@ public class AccountService {
                 .toList();
     }
 
-    @Cacheable(value = "accounts_list")
+    @Cacheable(value = "accounts")
     public List<AccountResponse> getAccountsByUsername(String username) {
         Customer customer = customerRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));

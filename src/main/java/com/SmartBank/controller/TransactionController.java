@@ -38,5 +38,4 @@ public class TransactionController {
                 .body(service.transfer(request));
     }
 
-
 }

@@ -1,15 +1,14 @@
 package com.SmartBank.util;
 
-import com.SmartBank.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JwtUtilTest {
+class JwtTokenProvider {
 
-    private JwtTokenProvider jwtUtil;
+    private com.SmartBank.security.JwtTokenProvider jwtUtil;
 
     private static final String USERNAME = "testuser";
     private static final String ROLE = "CUSTOMER";
@@ -17,7 +16,7 @@ class JwtUtilTest {
 
     @BeforeEach
     void setUp() {
-        jwtUtil = new JwtTokenProvider();
+        jwtUtil = new com.SmartBank.security.JwtTokenProvider();
 
         ReflectionTestUtils.setField(jwtUtil, "secretKey", SECRET);
         ReflectionTestUtils.setField(jwtUtil, "expiration", 3600000L);

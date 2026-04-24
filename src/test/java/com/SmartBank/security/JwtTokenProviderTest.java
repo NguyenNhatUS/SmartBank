@@ -1,14 +1,17 @@
-package com.SmartBank.util;
+package com.SmartBank.security;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class JwtTokenProvider {
+@ExtendWith(MockitoExtension.class)
+class JwtTokenProviderTest {
 
-    private com.SmartBank.security.JwtTokenProvider jwtUtil;
+    private JwtTokenProvider jwtUtil;
 
     private static final String USERNAME = "testuser";
     private static final String ROLE = "CUSTOMER";
@@ -16,7 +19,7 @@ class JwtTokenProvider {
 
     @BeforeEach
     void setUp() {
-        jwtUtil = new com.SmartBank.security.JwtTokenProvider();
+        jwtUtil = new JwtTokenProvider();
 
         ReflectionTestUtils.setField(jwtUtil, "secretKey", SECRET);
         ReflectionTestUtils.setField(jwtUtil, "expiration", 3600000L);
@@ -33,25 +36,25 @@ class JwtTokenProvider {
     @Test
     void extractUsername_shouldReturnCorrectUsername() {
         String token = jwtUtil.generateToken(USERNAME, ROLE);
-        assertEquals(USERNAME, jwtUtil.extractUsername(token));
+        Assertions.assertEquals(USERNAME, jwtUtil.extractUsername(token));
     }
 
     @Test
     void extractRole_shouldReturnCorrectRole() {
         String token = jwtUtil.generateToken(USERNAME, ROLE);
-        assertEquals(ROLE, jwtUtil.extractRole(token));
+        Assertions.assertEquals(ROLE, jwtUtil.extractRole(token));
     }
 
     @Test
     void isTokenValid_shouldReturnTrue_whenValidToken() {
         String token = jwtUtil.generateToken(USERNAME, ROLE);
-        assertTrue(jwtUtil.isTokenValid(token));
+        Assertions.assertTrue(jwtUtil.isTokenValid(token));
     }
 
     @Test
     void isTokenValid_shouldReturnFalse_whenTamperedToken() {
         String token = jwtUtil.generateToken(USERNAME, ROLE) + "tampered";
-        assertFalse(jwtUtil.isTokenValid(token));
+        Assertions.assertFalse(jwtUtil.isTokenValid(token));
     }
 
     @Test
@@ -67,13 +70,13 @@ class JwtTokenProvider {
         ReflectionTestUtils.setField(jwtUtil, "expiration", -1000L);
         String token = jwtUtil.generateToken(USERNAME, ROLE);
 
-        assertFalse(jwtUtil.isTokenValid(token));
+        Assertions.assertFalse(jwtUtil.isTokenValid(token));
     }
 
     @Test
     void isTokenValid_shouldReturnFalse_whenTokenIsNull() {
         try {
-            assertFalse(jwtUtil.isTokenValid(null));
+            Assertions.assertFalse(jwtUtil.isTokenValid(null));
         } catch (Exception e) {
             assertTrue(e instanceof IllegalArgumentException || e instanceof NullPointerException);
         }

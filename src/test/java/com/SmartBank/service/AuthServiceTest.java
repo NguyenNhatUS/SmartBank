@@ -31,12 +31,10 @@ class AuthServiceTest {
     @Mock private CustomerRepository customerRepository;
     @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtTokenProvider jwtUtil;
+    @Mock private JwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
     private AuthService authService;
-
-    // ========== LOGIN ==========
 
     @Test
     void login_shouldReturnTokens_whenEmployeeCredentialsValid() {
@@ -47,8 +45,8 @@ class AuthServiceTest {
 
         when(employeeRepository.findByUsername("admin")).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches("password123", "hashed")).thenReturn(true);
-        when(jwtUtil.generateToken("admin", "ADMIN")).thenReturn("access-token");
-        when(jwtUtil.generateRefreshToken()).thenReturn("refresh-token");
+        when(jwtTokenProvider.generateToken("admin", "ADMIN")).thenReturn("access-token");
+        when(jwtTokenProvider.generateRefreshToken()).thenReturn("refresh-token");
 
         LoginRequest request = new LoginRequest();
         request.setUsername("admin");
@@ -136,8 +134,8 @@ class AuthServiceTest {
                 .build();
 
         when(refreshTokenRepository.findByToken("valid-refresh")).thenReturn(Optional.of(stored));
-        when(jwtUtil.generateToken("admin", "ADMIN")).thenReturn("new-access-token");
-        when(jwtUtil.generateRefreshToken()).thenReturn("new-refresh-token");
+        when(jwtTokenProvider.generateToken("admin", "ADMIN")).thenReturn("new-access-token");
+        when(jwtTokenProvider.generateRefreshToken()).thenReturn("new-refresh-token");
 
         RefreshRequest request = new RefreshRequest();
         request.setRefreshToken("valid-refresh");

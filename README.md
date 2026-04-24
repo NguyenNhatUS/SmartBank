@@ -6,12 +6,12 @@ A mini banking REST API built with **Java Spring Boot**, implementing full authe
 
 ## Tech Stack
 
-- Java 17
-- Spring Boot 3.x
-- Spring Security 6
-- MySQL
-- JPA / Hibernate
-- JUnit 5 + Mockito
+- **Backend**: Java 17, Spring Boot 3.x, Spring Security 6
+- **Database**: MySQL, JPA (Hibernate)
+- **Caching**: Spring Cache, Redis
+- **Testing**: JUnit 5, Mockito
+- **DevOps**: Docker
+
 
 ---
 
@@ -21,6 +21,7 @@ A mini banking REST API built with **Java Spring Boot**, implementing full authe
 src/main/java/com/smartbank/
 │
 ├── config/
+│   ├── CacheConfig.java
 │   └── SecurityConfig.java
 │
 ├── controller/
@@ -43,12 +44,13 @@ src/main/java/com/smartbank/
 │   ├── RefreshTokenRepository.java
 │   └── TransactionRepository.java
 │
-├── model/
+├── entity/
 │   ├── enums/
 │   │   ├── AccountStatus.java
 │   │   ├── AccountType.java
 │   │   ├── CustomerStatus.java
 │   │   ├── Role.java
+│   │   ├── ErrorCode.java
 │   │   └── TransactionType.java
 │   │
 │   ├── Account.java
@@ -81,21 +83,15 @@ src/main/java/com/smartbank/
 │   ├── CustomerMapper.java
 │   └── TransactionMapper.java
 │
-├── filter/
-│   └── JwtAuthenticationFilter.java
-│
-├── util/
-│   └── JwtUtil.java
+├── security/
+│   ├── JwtAuthenticationFilter.java
+│   └── JwtTokenProvider.java
 │
 ├── exception/
-│   ├── AccountNotActiveException.java
 │   ├── CustomAccessDeniedHandler.java
 │   ├── CustomAuthenticationEntryPoint.java
-│   ├── DuplicateResourceException.java
 │   ├── GlobalExceptionHandler.java
-│   ├── InsufficientFundsException.java
-│   ├── ResourceNotFoundException.java
-│   └── WebException.java
+│   └── AppException.java
 │
 └── SmartBankApplication.java
 ```

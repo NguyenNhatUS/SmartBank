@@ -162,7 +162,11 @@ jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION}
 ### 4. Run the application
 
 ```bash
-./mvnw spring-boot:run
+# First run or after code changes
+docker compose up --build
+
+# Subsequent runs (no code changes)
+docker compose up
 ```
 
 The server runs at `http://localhost:8080` by default.

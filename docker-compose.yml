@@ -1,0 +1,79 @@
+services:
+
+  # ========================
+  # MySQL
+  # ========================
+  mysql:
+    image: mysql:8.0
+    container_name: smartbank-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ducnhat12a1
+      MYSQL_DATABASE: SmartBank
+    ports:
+      - "3307:3306"        # Map sang 3307 để tránh conflict với MySQL local
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pducnhat12a1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================
+  # Redis
+  # ========================
+  redis:
+    image: redis:7.2-alpine
+    container_name: smartbank-redis
+    restart: unless-stopped
+    command: redis-server --requirepass NguyenLeDucNhat
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "NguyenLeDucNhat", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================
+  # Spring Boot App
+  # ========================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartbank-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # MySQL
+      DB_URL: jdbc:mysql://mysql:3306/SmartBank?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ducnhat12a1
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: NguyenLeDucNhat
+      REDIS_TIMEOUT: 2000ms
+      # JPA
+      JPA_DDL_AUTO: update
+      JPA_SHOW_SQL: "false"    # Tắt SQL log ở môi trường Docker
+      # Cache
+      CACHE_TTL: 10m
+      # JWT
+      JWT_SECRET: nguyenleducnhat182006fithcmusspringbootsecurity
+      JWT_EXPIRATION: 900000
+      JWT_REFRESH_EXPIRATION: 604800000
+
+volumes:
+  mysql_data:
+  redis_data:

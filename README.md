@@ -128,25 +128,33 @@ src/main/resources/application.properties
 Example configuration:
 
 ```properties
-# ==================== Database ====================
-spring.datasource.url=jdbc:mysql://localhost:3306/SmartBank
-spring.datasource.username=root
-spring.datasource.password=your_mysql_password
+# ── Datasource ───────────────────────────────────────────────────────────────
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-# ==================== JPA ====================
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+# ── JPA / Hibernate ──────────────────────────────────────────────────────────
+spring.jpa.hibernate.ddl-auto=${JPA_DDL_AUTO}
+spring.jpa.show-sql=${JPA_SHOW_SQL}
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.open-in-view=false
 
-# ==================== JWT ====================
-# Secret key — must be at least 256 bits (32 characters) for HS256
-jwt.secret=your-secret-key-must-be-at-least-256-bits-long-for-hs256
+# ── Redis ────────────────────────────────────────────────────────────────────
+spring.data.redis.host=${REDIS_HOST}
+spring.data.redis.port=${REDIS_PORT}
+spring.data.redis.password=${REDIS_PASSWORD}
+spring.data.redis.timeout=${REDIS_TIMEOUT}
 
-# Access token TTL: 15 minutes (in milliseconds)
-jwt.expiration=900000
+# ── Cache ────────────────────────────────────────────────────────────────────
+spring.cache.type=redis
+spring.cache.redis.time-to-live=${CACHE_TTL}
+spring.cache.redis.cache-null-values=false
 
-# Refresh token TTL: 7 days (in milliseconds)
-jwt.refresh-expiration=604800000
+# ── JWT ──────────────────────────────────────────────────────────────────────
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION}
+jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION}
 ```
 
 > **Note:** Make sure `jwt.secret` is at least 32 characters long to avoid startup errors.

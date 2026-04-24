@@ -54,25 +54,8 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-    environment:
-      # MySQL
-      DB_URL: jdbc:mysql://mysql:3306/SmartBank?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      DB_USERNAME: root
-      DB_PASSWORD: ducnhat12a1
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: NguyenLeDucNhat
-      REDIS_TIMEOUT: 2000ms
-      # JPA
-      JPA_DDL_AUTO: update
-      JPA_SHOW_SQL: "false"    # Tắt SQL log ở môi trường Docker
-      # Cache
-      CACHE_TTL: 10m
-      # JWT
-      JWT_SECRET: nguyenleducnhat182006fithcmusspringbootsecurity
-      JWT_EXPIRATION: 900000
-      JWT_REFRESH_EXPIRATION: 604800000
+    env_file:
+      - .env
 
 volumes:
   mysql_data:

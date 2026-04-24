@@ -15,13 +15,6 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Employee(String username, String password, Role role, boolean enabled) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.enabled = enabled;
-    }
-
     @Column(unique = true, nullable = false)
     private String username;
 

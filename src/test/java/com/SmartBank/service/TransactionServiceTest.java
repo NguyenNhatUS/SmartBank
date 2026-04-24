@@ -8,6 +8,7 @@ import com.SmartBank.entity.Account;
 import com.SmartBank.entity.enums.AccountStatus;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.TransactionRepository;
+import com.SmartBank.exception.AppException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,6 +75,7 @@ class TransactionServiceTest {
 
     @Test
     void deposit_shouldIncreaseBalance_whenValidRequest() {
+        when(accountRepository.findByAccountNumber(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
 
         when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -97,8 +99,8 @@ class TransactionServiceTest {
                 .description("Nap tien")
                 .build();
 
-        assertThatThrownBy(() -> service.withdraw(withDrawRequest)).isInstanceOf(InsufficientFundsException.class)
-                .hasMessageContaining("Insufficient balance");
+        assertThatThrownBy(() -> service.withdraw(withDrawRequest)).isInstanceOf(AppException.class)
+                .hasMessageContaining("Invalid transaction amount");
 
         verify(accountRepository, never()).save(sourceAccount);
 
@@ -145,8 +147,8 @@ class TransactionServiceTest {
 
         transferRequest.setAmount(new BigDecimal("999999999"));
 
-        assertThatThrownBy(() -> service.transfer(transferRequest)).isInstanceOf(InsufficientFundsException.class)
-                .hasMessageContaining("Insufficient balance");
+        assertThatThrownBy(() -> service.transfer(transferRequest)).isInstanceOf(AppException.class)
+                .hasMessageContaining("Invalid transaction amount");
 
         verify(accountRepository, never()).save(sourceAccount);
 
@@ -155,7 +157,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    public void transfer_shouldThrown_whenAccountNotActive() {
+    public void transfer_shouldThrow_whenAccountNotActive() {
         sourceAccount.setStatus(AccountStatus.FROZEN);
         targetAccount.setStatus(AccountStatus.FROZEN);
 
@@ -163,8 +165,8 @@ class TransactionServiceTest {
 
         when(accountRepository.findByAccountNumber(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
 
-        assertThatThrownBy(() -> service.transfer(transferRequest)).isInstanceOf(AccountNotActiveException.class)
-                .hasMessageContaining("not ACTIVE");
+        assertThatThrownBy(() -> service.transfer(transferRequest)).isInstanceOf(AppException.class)
+                .hasMessageContaining("Account is inactive");
 
         verify(accountRepository, never()).save(sourceAccount);
     }

@@ -4,7 +4,6 @@ import com.SmartBank.entity.enums.AccountStatus;
 import com.SmartBank.entity.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

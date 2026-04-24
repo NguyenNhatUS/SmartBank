@@ -19,10 +19,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -129,12 +127,13 @@ class AuthServiceTest {
 
     @Test
     void refresh_shouldReturnNewTokens_whenRefreshTokenValid() {
-        RefreshToken stored = new RefreshToken();
-        stored.setToken("valid-refresh");
-        stored.setUsername("admin");
-        stored.setRole("ADMIN");
-        stored.setExpiresAt(LocalDateTime.now().plusDays(7));
-        stored.setRevoked(false);
+        RefreshToken stored = RefreshToken.builder()
+                .token("valid-refresh")
+                .username("admin")
+                .role("ADMIN")
+                .expiresAt(LocalDateTime.now().plusDays(7))
+                .revoked(false)
+                .build();
 
         when(refreshTokenRepository.findByToken("valid-refresh")).thenReturn(Optional.of(stored));
         when(jwtUtil.generateToken("admin", "ADMIN")).thenReturn("new-access-token");
@@ -151,9 +150,10 @@ class AuthServiceTest {
 
     @Test
     void refresh_shouldThrow_whenRefreshTokenRevoked() {
-        RefreshToken stored = new RefreshToken();
-        stored.setToken("revoked-token");
-        stored.setRevoked(true);
+        RefreshToken stored = RefreshToken.builder()
+                .token("revoked-token")
+                .revoked(true)
+                .build();
 
         when(refreshTokenRepository.findByToken("revoked-token")).thenReturn(Optional.of(stored));
 
@@ -165,10 +165,11 @@ class AuthServiceTest {
 
     @Test
     void refresh_shouldThrow_whenRefreshTokenExpired() {
-        RefreshToken stored = new RefreshToken();
-        stored.setToken("expired-token");
-        stored.setRevoked(false);
-        stored.setExpiresAt(LocalDateTime.now().minusDays(1)); // đã hết hạn
+        RefreshToken stored = RefreshToken.builder()
+                .token("expired-token")
+                .revoked(false)
+                .expiresAt(LocalDateTime.now().minusDays(1))
+                .build();
 
         when(refreshTokenRepository.findByToken("expired-token")).thenReturn(Optional.of(stored));
 

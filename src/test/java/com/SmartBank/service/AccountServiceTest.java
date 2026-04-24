@@ -10,6 +10,7 @@ import com.SmartBank.entity.enums.AccountStatus;
 import com.SmartBank.entity.enums.AccountType;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.exception.AppException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
 import java.math.BigDecimal;
 import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -106,13 +104,13 @@ class AccountServiceTest {
     }
 
     @Test
-    public void create_shouldThrown_whenCustomerNotFound() {
+    public void create_shouldThrow_whenCustomerNotFound() {
         request.setCustomerId(99L);
 
         when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(request))
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(AppException.class)
                 .hasMessageContaining("not found");
     }
 
@@ -165,8 +163,7 @@ class AccountServiceTest {
 
         verify(accountRepository, times(1)).save(account);
 
-        verify(mapper, times(1)).toResponse(account
-        );
+        verify(mapper, times(1)).toResponse(account);
     }
 
 

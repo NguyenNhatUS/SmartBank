@@ -40,13 +40,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // ── Public ──────────────────────────────────────
                         .requestMatchers("/auth/**").permitAll()
+
+                        // ── Customer: self-service ───────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/accounts/my").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.POST, "/api/accounts/my").hasRole("CUSTOMER")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/transactions/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+
+                        // ── Staff operations ─────────────────────────────
                         .requestMatchers("/api/accounts/**").hasAnyRole("EMPLOYEE", "ADMIN")
+
+                        // ── Admin only ───────────────────────────────────
                         .requestMatchers("/api/customers/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

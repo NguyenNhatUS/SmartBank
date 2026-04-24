@@ -6,6 +6,7 @@ import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.exception.AppException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,7 +105,7 @@ class CustomerServiceTest {
     public void create_shouldThrow_whenEmailExists() {
         when(customerRepository.existsByEmail(request.getEmail())).thenReturn(true);
 
-        assertThatThrownBy(() -> service.create(request)).isInstanceOf(DuplicateResourceException.class)
+        assertThatThrownBy(() -> service.create(request)).isInstanceOf(AppException.class)
                 .hasMessageContaining("Email");
 
         verify(customerRepository, never()).save(customer);
@@ -116,7 +117,7 @@ class CustomerServiceTest {
 
         when(customerRepository.existsByPhone(request.getPhone())).thenReturn(true);
 
-        assertThatThrownBy(() -> service.create(request)).isInstanceOf(DuplicateResourceException.class)
+        assertThatThrownBy(() -> service.create(request)).isInstanceOf(AppException.class)
                 .hasMessageContaining("Phone");
 
         verify(customerRepository, never()).save(customer);
@@ -127,7 +128,7 @@ class CustomerServiceTest {
         when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getById(99L))
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(AppException.class)
                 .hasMessageContaining("not found");
     }
 
@@ -136,7 +137,7 @@ class CustomerServiceTest {
         when(customerRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.deleteById(99L))
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(AppException.class)
                 .hasMessageContaining("not found");
     }
 
@@ -154,13 +155,3 @@ class CustomerServiceTest {
 
 
 }
-
-
-
-
-
-
-
-
-
-

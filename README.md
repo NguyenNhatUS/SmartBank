@@ -394,4 +394,4 @@ The system maintains two separate user tables — `employees` and `customers`. `
 
 Test coverage includes:
 - `AuthServiceTest` — login, register, refresh, logout
-- `JwtUtilTest` — generate, validate, parse token
+- `JwtTokenProviderTest` — generate, validate, parse token

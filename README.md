@@ -117,15 +117,12 @@ cd smartbank
 CREATE DATABASE smartbank;
 ```
 
-### 3. Configure `application.properties`
 
-This file is **not included in the repository** as it contains sensitive credentials. Create it at:
+### 3 Configuration
 
-```
-src/main/resources/application.properties
-```
+#### 3.1. Create `application.properties`
 
-Example configuration:
+Create the file at `src/main/resources/application.properties`. All sensitive values are read from environment variables — do not hardcode them directly.
 
 ```properties
 # ── Datasource ───────────────────────────────────────────────────────────────
@@ -157,9 +154,40 @@ jwt.expiration=${JWT_EXPIRATION}
 jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION}
 ```
 
-> **Note:** Make sure `jwt.secret` is at least 32 characters long to avoid startup errors.
+---
 
-### 4. Run the application
+#### 3.2. Create `.env`
+
+Create a `.env` file at the project root. Copy the template below and fill in your own values.
+
+```env
+# ── Database ──────────────────────────────────────────────────────────────────
+DB_URL=jdbc:mysql://mysql:3306/SmartBank?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
+
+# ── JPA ───────────────────────────────────────────────────────────────────────
+JPA_DDL_AUTO=update
+JPA_SHOW_SQL=false
+
+# ── Redis ─────────────────────────────────────────────────────────────────────
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+REDIS_TIMEOUT=2000ms
+
+# ── Cache ─────────────────────────────────────────────────────────────────────
+CACHE_TTL=10m
+
+# ── JWT ───────────────────────────────────────────────────────────────────────
+# Must be at least 32 characters
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRATION=900000
+JWT_REFRESH_EXPIRATION=604800000
+```
+#### 3.3. Run with Docker
+
+Once `application.properties` and `.env` are in place, start the full stack with:
 
 ```bash
 # First run or after code changes
@@ -169,9 +197,7 @@ docker compose up --build
 docker compose up
 ```
 
-The server runs at `http://localhost:8080` by default.
-
----
+The server will be available at `http://localhost:8080`.
 
 ## API Reference
 

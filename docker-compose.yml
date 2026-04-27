@@ -1,8 +1,5 @@
 services:
 
-  # ========================
-  # MySQL
-  # ========================
   mysql:
     image: mysql:8.0
     container_name: smartbank-mysql
@@ -11,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: ducnhat12a1
       MYSQL_DATABASE: SmartBank
     ports:
-      - "3307:3306"        # Map sang 3307 để tránh conflict với MySQL local
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -20,9 +17,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ========================
-  # Redis
-  # ========================
   redis:
     image: redis:7.2-alpine
     container_name: smartbank-redis
@@ -38,9 +32,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ========================
-  # Spring Boot App
-  # ========================
   app:
     build:
       context: .

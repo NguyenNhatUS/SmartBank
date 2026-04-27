@@ -4,9 +4,6 @@ services:
     image: mysql:8.0
     container_name: smartbank-mysql
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ducnhat12a1
-      MYSQL_DATABASE: SmartBank
     ports:
       - "3307:3306"
     volumes:

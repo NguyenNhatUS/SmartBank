@@ -37,9 +37,7 @@ public enum ErrorCode {
     // ========== ACCOUNT ==========
     ACCOUNT_NOT_FOUND(1400, "Account not found", HttpStatus.NOT_FOUND),
     ACCOUNT_ALREADY_EXISTS(1401, "Account already exists", HttpStatus.BAD_REQUEST),
-    ACCOUNT_INSUFFICIENT_BALANCE(1402, "Insufficient balance", HttpStatus.BAD_REQUEST),
-    ACCOUNT_LOCKED(1403, "Account is locked", HttpStatus.FORBIDDEN),
-    ACCOUNT_INACTIVE(1404, "Account is inactive", HttpStatus.BAD_REQUEST),
+    ACCOUNT_INACTIVE(1402, "Account is inactive", HttpStatus.BAD_REQUEST),
 
     // ========== TRANSACTION ==========
     TRANSACTION_NOT_FOUND(1500, "Transaction not found", HttpStatus.NOT_FOUND),

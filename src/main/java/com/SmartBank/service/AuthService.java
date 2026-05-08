@@ -17,7 +17,6 @@ import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -47,13 +46,13 @@ public class AuthService {
             role = employeeOpt.get().getRole().name();
         } else {
             Customer customer = customerRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
+                    .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
             encodedPassword = customer.getPassword();
             role = "CUSTOMER";
         }
 
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-            throw new UsernameNotFoundException("Invalid credentials");
+            throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
 
         String token = jwtUtil.generateToken(username, role);
@@ -72,15 +71,15 @@ public class AuthService {
 
     public LoginResponse refresh(RefreshRequest request) {
         RefreshToken stored = refreshTokenRepository.findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
 
         if (stored.isRevoked()) {
-            throw new RuntimeException("Refresh token has been revoked");
+            throw new AppException(ErrorCode.REFRESH_TOKEN_REVOKED);
         }
 
         if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(stored);
-            throw new RuntimeException("Refresh token expired");
+            throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
         // Revoke token cũ, cấp token mới (rotation)
@@ -121,7 +120,6 @@ public class AuthService {
         customerRepository.save(customer);
     }
 
-
     private String createRefreshToken(String username, String role) {
         RefreshToken refreshToken = RefreshToken
                 .builder()
@@ -138,11 +136,11 @@ public class AuthService {
 
     public void createEmployee(CreateEmployeeRequest request) {
         if (request.getRole() == Role.CUSTOMER) {
-            throw new RuntimeException("Use /auth/register for customer accounts");
+            throw new AppException(ErrorCode.FORBIDDEN);
         }
 
         if (employeeRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new AppException(ErrorCode.EMPLOYEE_ALREADY_EXISTS);
         }
 
         Employee employee = Employee

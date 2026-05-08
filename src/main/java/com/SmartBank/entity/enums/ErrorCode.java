@@ -22,6 +22,8 @@ public enum ErrorCode {
     INVALID_TOKEN(1105, "Invalid token", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED(1106, "Token expired", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_NOT_FOUND(1107, "Refresh token not found", HttpStatus.NOT_FOUND),
+    REFRESH_TOKEN_REVOKED(1108, "Refresh token has been revoked", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED(1109, "Refresh token has expired", HttpStatus.UNAUTHORIZED),
 
     // ========== CUSTOMER ==========
     CUSTOMER_NOT_FOUND(1200, "Customer not found", HttpStatus.NOT_FOUND),
@@ -43,12 +45,7 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND(1500, "Transaction not found", HttpStatus.NOT_FOUND),
     INVALID_TRANSACTION_AMOUNT(1501, "Invalid transaction amount", HttpStatus.BAD_REQUEST),
     TRANSACTION_FAILED(1502, "Transaction failed", HttpStatus.INTERNAL_SERVER_ERROR),
-    SAME_ACCOUNT_TRANSFER(1503, "Cannot transfer to the same account", HttpStatus.BAD_REQUEST),
-
-    // ========== VALIDATION ==========
-    INVALID_KEY(1600, "Invalid key", HttpStatus.BAD_REQUEST),
-    INVALID_FORMAT(1601, "Invalid format", HttpStatus.BAD_REQUEST),
-    MISSING_REQUIRED_FIELD(1602, "Missing required field", HttpStatus.BAD_REQUEST);
+    SAME_ACCOUNT_TRANSFER(1503, "Cannot transfer to the same account", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

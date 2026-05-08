@@ -21,7 +21,7 @@ A mini banking REST API built with **Java Spring Boot**, implementing full authe
 src/main/java/com/smartbank/
 │
 ├── config/
-│   ├── CacheConfig.java
+│   ├── RedisConfig.java
 │   └── SecurityConfig.java
 │
 ├── controller/

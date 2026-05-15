@@ -104,5 +104,3 @@ mvn spring-boot:run
 
 ---
 
-## License
-MIT License

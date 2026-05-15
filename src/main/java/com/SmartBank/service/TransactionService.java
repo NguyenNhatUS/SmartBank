@@ -85,6 +85,10 @@ public class TransactionService {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
+        if (account.getMaturityDate() != null && account.getMaturityDate().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_MATURED);
+        }
+
         if (account.getBalance().subtract(request.getAmount()).compareTo(BigDecimal.ZERO) < 0) {
             throw new AppException(ErrorCode.INVALID_TRANSACTION_AMOUNT);
         }
@@ -117,6 +121,10 @@ public class TransactionService {
 
         if (source.getStatus() != AccountStatus.ACTIVE || target.getStatus() != AccountStatus.ACTIVE) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        }
+
+        if (source.getMaturityDate() != null && source.getMaturityDate().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_MATURED);
         }
 
         if (source.getBalance().compareTo(request.getAmount()) < 0) {
@@ -153,6 +161,10 @@ public class TransactionService {
 
         if (account.getStatus() != AccountStatus.ACTIVE) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        }
+
+        if (account.getMaturityDate() != null && account.getMaturityDate().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_MATURED);
         }
 
         if (account.getBalance().compareTo(request.getAmount()) < 0) {

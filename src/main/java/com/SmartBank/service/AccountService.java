@@ -115,6 +115,12 @@ public class AccountService {
         account.setBalance(BigDecimal.ZERO);
         account.setStatus(AccountStatus.ACTIVE);
         account.setCustomer(customer);
+        account.setInterestRate(request.getInterestRate());
+        account.setTermMonths(request.getTermMonths());
+        
+        if (request.getTermMonths() != null && request.getTermMonths() > 0) {
+            account.setMaturityDate(LocalDateTime.now().plusMonths(request.getTermMonths()));
+        }
 
         return mapper.toResponse(accountRepository.save(account));
     }

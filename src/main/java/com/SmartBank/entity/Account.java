@@ -33,6 +33,18 @@ public class Account {
     @Column(length = 25)
     private AccountStatus status;
 
+    @Column(name = "interest_rate", precision = 5, scale = 4)
+    private BigDecimal interestRate; // e.g., 0.0500 for 5%
+
+    @Column(name = "last_interest_calculation_date")
+    private LocalDateTime lastInterestCalculationDate;
+
+    @Column(name = "term_months")
+    private Integer termMonths;
+
+    @Column(name = "maturity_date")
+    private LocalDateTime maturityDate;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -45,5 +57,6 @@ public class Account {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) this.status = AccountStatus.ACTIVE;
         if (this.balance == null) this.balance = BigDecimal.ZERO;
+        if (this.lastInterestCalculationDate == null) this.lastInterestCalculationDate = LocalDateTime.now();
     }
 }

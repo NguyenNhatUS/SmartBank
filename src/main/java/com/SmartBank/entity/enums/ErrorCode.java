@@ -38,6 +38,7 @@ public enum ErrorCode {
     ACCOUNT_NOT_FOUND(1400, "Account not found", HttpStatus.NOT_FOUND),
     ACCOUNT_ALREADY_EXISTS(1401, "Account already exists", HttpStatus.BAD_REQUEST),
     ACCOUNT_INACTIVE(1402, "Account is inactive", HttpStatus.BAD_REQUEST),
+    ACCOUNT_NOT_MATURED(1403, "Savings account has not reached maturity date", HttpStatus.BAD_REQUEST),
 
     // ========== TRANSACTION ==========
     TRANSACTION_NOT_FOUND(1500, "Transaction not found", HttpStatus.NOT_FOUND),

@@ -13,4 +13,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findAllByOrderByCustomerIdAsc();
 
     Account findByAccountNumber(String accountNumber);
+
+    List<Account> findByType(com.SmartBank.entity.enums.AccountType type);
 }

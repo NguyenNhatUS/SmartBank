@@ -18,6 +18,11 @@ public class AccountResponse {
     private String status;
     private LocalDateTime createdAt;
 
+    private BigDecimal interestRate;
+    private LocalDateTime lastInterestCalculationDate;
+    private Integer termMonths;
+    private LocalDateTime maturityDate;
+
     private Long customerId;
     private String customerName;
 }

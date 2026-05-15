@@ -6,6 +6,8 @@ import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class AccountMapper {
     public AccountResponse toResponse(Account account) {
@@ -15,6 +17,10 @@ public class AccountMapper {
                 .type(String.valueOf(account.getType()))
                 .balance(account.getBalance())
                 .status(String.valueOf(account.getStatus()))
+                .interestRate(account.getInterestRate())
+                .lastInterestCalculationDate(account.getLastInterestCalculationDate())
+                .termMonths(account.getTermMonths())
+                .maturityDate(account.getMaturityDate())
                 .createdAt(account.getCreatedAt())
                 .customerId(account.getCustomer().getId())
                 .customerName(account.getCustomer().getFullName())
@@ -22,10 +28,18 @@ public class AccountMapper {
     }
 
     public Account toEntity(AccountCreateRequest request, Customer customer) {
-        return Account.builder()
+        Account account = Account.builder()
                 .customer(customer)
                 .type(request.getType())
+                .interestRate(request.getInterestRate())
+                .termMonths(request.getTermMonths())
                 .build();
+
+        if (request.getTermMonths() != null && request.getTermMonths() > 0) {
+            account.setMaturityDate(LocalDateTime.now().plusMonths(request.getTermMonths()));
+        }
+
+        return account;
     }
 
 }

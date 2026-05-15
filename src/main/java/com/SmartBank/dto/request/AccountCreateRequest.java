@@ -4,6 +4,8 @@ import com.SmartBank.entity.enums.AccountType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,7 @@ public class AccountCreateRequest {
 
     @NotNull(message = "Type can not be null")
     private AccountType type;
+
+    private BigDecimal interestRate;
+    private Integer termMonths;
 }

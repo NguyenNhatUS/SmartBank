@@ -1,5 +1,7 @@
 package com.SmartBank.controller;
 
+import com.SmartBank.security.RateLimit;
+
 import com.SmartBank.dto.request.CreateEmployeeRequest;
 import com.SmartBank.dto.request.LoginRequest;
 import com.SmartBank.dto.request.RefreshRequest;
@@ -20,6 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/register")
+    @RateLimit(requests = 3, duration = 60)
     public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity
@@ -28,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login")
+    @RateLimit(requests = 5, duration = 60)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
@@ -46,10 +50,9 @@ public class AuthController {
 
     @PostMapping("/admin/employees")
     public ResponseEntity<Void> createEmployee(@RequestBody CreateEmployeeRequest request,
-                                               Authentication authentication) {
+            Authentication authentication) {
         authService.createEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
 
 }

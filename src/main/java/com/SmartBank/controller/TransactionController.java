@@ -1,5 +1,7 @@
 package com.SmartBank.controller;
 
+import com.SmartBank.security.RateLimit;
+
 import com.SmartBank.dto.request.DepositWithDrawRequest;
 import com.SmartBank.dto.request.TransferRequest;
 import com.SmartBank.dto.response.TransactionResponse;
@@ -21,18 +23,21 @@ public class TransactionController {
     private final TransactionService service;
 
     @PostMapping("/deposit")
+    @RateLimit(requests = 10, duration = 60)
     public ResponseEntity<TransactionResponse> deposit(@Valid @RequestBody DepositWithDrawRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.deposit(request));
     }
 
     @PostMapping("/withdraw")
+    @RateLimit(requests = 10, duration = 60)
     public ResponseEntity<TransactionResponse> withdraw(@Valid @RequestBody DepositWithDrawRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.withdraw(request));
     }
 
     @PostMapping("/transfer")
+    @RateLimit(requests = 10, duration = 60)
     public ResponseEntity<TransactionResponse> transfer(@Valid @RequestBody TransferRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.transfer(request));

@@ -26,21 +26,24 @@ public class TransactionService {
 
     private final TransactionMapper mapper;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, TransactionMapper mapper) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository,
+            TransactionMapper mapper) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.mapper = mapper;
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
+            "customers" }, allEntries = true)
     public TransactionResponse deposit(@Valid DepositWithDrawRequest request) {
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
 
-        if(account == null) {
+        if (account == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        if(account.getStatus() != AccountStatus.ACTIVE) {
+        if (account.getStatus() != AccountStatus.ACTIVE) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
@@ -64,14 +67,16 @@ public class TransactionService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
+            "customers" }, allEntries = true)
     public TransactionResponse withdraw(@Valid DepositWithDrawRequest request) {
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
 
-        if(account == null) {
+        if (account == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        if(account.getStatus() != AccountStatus.ACTIVE) {
+        if (account.getStatus() != AccountStatus.ACTIVE) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
         }
 
@@ -95,16 +100,18 @@ public class TransactionService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
+            "customers" }, allEntries = true)
     public TransactionResponse transfer(@Valid TransferRequest request) {
         Account source = accountRepository.findByAccountNumber(request.getSourceAccountNumber());
 
         Account target = accountRepository.findByAccountNumber(request.getTargetAccountNumber());
 
-        if(source == null || target == null) {
+        if (source == null || target == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        if(source.getStatus() != AccountStatus.ACTIVE || target.getStatus() != AccountStatus.ACTIVE) {
+        if (source.getStatus() != AccountStatus.ACTIVE || target.getStatus() != AccountStatus.ACTIVE) {
             throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
         }
 

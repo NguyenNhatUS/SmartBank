@@ -43,7 +43,8 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND(1500, "Transaction not found", HttpStatus.NOT_FOUND),
     INVALID_TRANSACTION_AMOUNT(1501, "Invalid transaction amount", HttpStatus.BAD_REQUEST),
     TRANSACTION_FAILED(1502, "Transaction failed", HttpStatus.INTERNAL_SERVER_ERROR),
-    SAME_ACCOUNT_TRANSFER(1503, "Cannot transfer to the same account", HttpStatus.BAD_REQUEST);
+    SAME_ACCOUNT_TRANSFER(1503, "Cannot transfer to the same account", HttpStatus.BAD_REQUEST),
+    TOO_MANY_REQUESTS(1504, "Too many requests", HttpStatus.TOO_MANY_REQUESTS);
 
     private final int code;
     private final String message;

@@ -1,6 +1,5 @@
 package com.SmartBank.config;
 
-
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,34 +16,44 @@ import java.util.Map;
 @EnableCaching
 public class RedisConfig {
 
-    @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // TTL mặc định
-        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10))
-                .disableCachingNullValues()
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair
-                                .fromSerializer(new GenericJackson2JsonRedisSerializer())
-                );
+        @Bean
+        public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+                // TTL mặc định
+                RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.ofMinutes(10))
+                                .disableCachingNullValues()
+                                .serializeValuesWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-        // TTL riêng cho từng cache
-        Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
+                // TTL riêng cho từng cache
+                Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
 
-        cacheConfigs.put("accounts",
-                defaultConfig.entryTtl(Duration.ofMinutes(5)));
+                cacheConfigs.put("accounts",
+                                defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
-        // Thông tin khách hàng — ít thay đổi → TTL dài hơn
-        cacheConfigs.put("customers",
-                defaultConfig.entryTtl(Duration.ofMinutes(30)));
+                // Thông tin khách hàng — ít thay đổi → TTL dài hơn
+                cacheConfigs.put("customers",
+                                defaultConfig.entryTtl(Duration.ofMinutes(30)));
 
-        cacheConfigs.put("accounts_customers",
-                defaultConfig.entryTtl(Duration.ofMinutes(10)));
+                cacheConfigs.put("accounts_customers",
+                                defaultConfig.entryTtl(Duration.ofMinutes(10)));
 
-        return RedisCacheManager
-                .builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
-                .withInitialCacheConfigurations(cacheConfigs)
-                .build();
-    }
+                return RedisCacheManager
+                                .builder(connectionFactory)
+                                .cacheDefaults(defaultConfig)
+                                .withInitialCacheConfigurations(cacheConfigs)
+                                .build();
+        }
+
+        @Bean
+        public org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate(
+                        RedisConnectionFactory connectionFactory) {
+                org.springframework.data.redis.core.RedisTemplate<String, Object> template = new org.springframework.data.redis.core.RedisTemplate<>();
+                template.setConnectionFactory(connectionFactory);
+                template.setKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
+                template.setValueSerializer(
+                                new org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer());
+                return template;
+        }
 }

@@ -36,14 +36,26 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    @PostMapping("/auth/verify-otp")
+    public ResponseEntity<LoginResponse> verifyOtp(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String code = request.get("code");
+        return ResponseEntity.ok(authService.verifyOtp(username, code));
+    }
+
     @PostMapping("/auth/refresh")
     public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refresh(request));
     }
 
     @PostMapping("/api/auth/logout")
-    public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
-        authService.logout(authentication.getName());
+    public ResponseEntity<Map<String, String>> logout(
+            Authentication authentication,
+            @RequestHeader("Authorization") String authHeader) {
+        
+        String token = authHeader.substring(7);
+        authService.logout(authentication.getName(), token);
+        
         return ResponseEntity
                 .ok(Map.of("message", "Logout successful"));
     }

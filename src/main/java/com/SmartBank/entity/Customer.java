@@ -52,6 +52,10 @@ public class Customer {
 
     private boolean enabled = true;
 
+    private boolean twoFactorEnabled = false;
+
+    private String secretKey;
+
     @OneToMany(
             mappedBy = "customer",
             cascade = CascadeType.ALL,

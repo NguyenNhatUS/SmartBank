@@ -45,7 +45,10 @@ public enum ErrorCode {
     INVALID_TRANSACTION_AMOUNT(1501, "Invalid transaction amount", HttpStatus.BAD_REQUEST),
     TRANSACTION_FAILED(1502, "Transaction failed", HttpStatus.INTERNAL_SERVER_ERROR),
     SAME_ACCOUNT_TRANSFER(1503, "Cannot transfer to the same account", HttpStatus.BAD_REQUEST),
-    TOO_MANY_REQUESTS(1504, "Too many requests", HttpStatus.TOO_MANY_REQUESTS);
+    TOO_MANY_REQUESTS(1504, "Too many requests", HttpStatus.TOO_MANY_REQUESTS),
+    ACCOUNT_LOCKED(1600, "Account is locked due to too many failed login attempts", HttpStatus.LOCKED),
+    PASSWORD_TOO_WEAK(1601, "Password does not meet the security requirements", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1602, "Invalid or expired OTP code", HttpStatus.UNAUTHORIZED);
 
     private final int code;
     private final String message;

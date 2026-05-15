@@ -15,6 +15,8 @@ import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
+import com.SmartBank.security.LoginAttemptService;
+import com.SmartBank.security.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +32,10 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtUtil;
+    private final TokenBlacklistService blacklistService;
+    private final LoginAttemptService loginAttemptService;
+    private final AuditService auditService;
+    private final OtpService otpService;
 
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
@@ -37,25 +43,45 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         String username = request.getUsername();
         String rawPassword = request.getPassword();
+        
+        if (loginAttemptService.isBlocked(username)) {
+            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+        }
+
         String role;
         String encodedPassword;
+        boolean twoFactorEnabled;
 
         Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
         if (employeeOpt.isPresent()) {
             encodedPassword = employeeOpt.get().getPassword();
             role = employeeOpt.get().getRole().name();
+            twoFactorEnabled = employeeOpt.get().isTwoFactorEnabled();
         } else {
             Customer customer = customerRepository.findByUsername(username)
                     .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
             encodedPassword = customer.getPassword();
             role = "CUSTOMER";
+            twoFactorEnabled = customer.isTwoFactorEnabled();
         }
 
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            loginAttemptService.loginFailed(username);
+            auditService.log(username, "LOGIN_FAILED", "Invalid password");
             throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        String token = jwtUtil.generateToken(username, role);
+        loginAttemptService.loginSucceeded(username);
+        auditService.log(username, "LOGIN_SUCCESS", "User logged in successfully");
+
+        if (twoFactorEnabled) {
+            otpService.generateOtp(username);
+            return LoginResponse.builder()
+                    .username(username)
+                    .role(role)
+                    .mfaRequired(true)
+                    .build();
+        }
 
         String accessToken = jwtUtil.generateToken(username, role);
         String refreshToken = createRefreshToken(username, role);
@@ -66,6 +92,35 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .username(username)
                 .role(role)
+                .mfaRequired(false)
+                .build();
+    }
+
+    public LoginResponse verifyOtp(String username, String otpCode) {
+        if (!otpService.validateOtp(username, otpCode)) {
+            auditService.log(username, "OTP_FAILED", "Invalid OTP code");
+            throw new AppException(ErrorCode.INVALID_OTP);
+        }
+
+        String role;
+        Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
+        if (employeeOpt.isPresent()) {
+            role = employeeOpt.get().getRole().name();
+        } else {
+            role = "CUSTOMER";
+        }
+
+        auditService.log(username, "OTP_SUCCESS", "MFA verified");
+
+        String accessToken = jwtUtil.generateToken(username, role);
+        String refreshToken = createRefreshToken(username, role);
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .username(username)
+                .role(role)
+                .mfaRequired(false)
                 .build();
     }
 
@@ -98,11 +153,18 @@ public class AuthService {
                 .build();
     }
 
-    public void logout(String username) {
+    public void logout(String username, String token) {
+        // Blacklist access token
+        long remainingTime = jwtUtil.getRemainingTime(token);
+        blacklistService.blacklistToken(token, remainingTime);
+
+        // Xóa refresh token trong DB
         refreshTokenRepository.deleteByUsername(username);
+        auditService.log(username, "LOGOUT", "User logged out");
     }
 
     public void register(RegisterRequest request) {
+        validatePassword(request.getPassword());
         boolean existsInEmployee = employeeRepository.findByUsername(request.getUsername()).isPresent();
         boolean existsInCustomer = customerRepository.findByUsername(request.getUsername()).isPresent();
 
@@ -135,6 +197,7 @@ public class AuthService {
     }
 
     public void createEmployee(CreateEmployeeRequest request) {
+        validatePassword(request.getPassword());
         if (request.getRole() == Role.CUSTOMER) {
             throw new AppException(ErrorCode.FORBIDDEN);
         }
@@ -152,5 +215,15 @@ public class AuthService {
                 .build();
 
         employeeRepository.save(employee);
+    }
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            throw new AppException(ErrorCode.PASSWORD_TOO_WEAK);
+        }
+        // Regex: At least 1 upper, 1 lower, 1 digit, 1 special char
+        String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
+        if (!password.matches(pattern)) {
+            throw new AppException(ErrorCode.PASSWORD_TOO_WEAK);
+        }
     }
 }

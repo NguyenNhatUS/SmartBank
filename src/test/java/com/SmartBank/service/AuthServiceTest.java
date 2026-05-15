@@ -12,12 +12,14 @@ import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
+import com.SmartBank.security.LoginAttemptService;
+import com.SmartBank.security.TokenBlacklistService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.SmartBank.exception.AppException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -32,6 +34,10 @@ class AuthServiceTest {
     @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtTokenProvider jwtTokenProvider;
+    @Mock private TokenBlacklistService blacklistService;
+    @Mock private LoginAttemptService loginAttemptService;
+    @Mock private AuditService auditService;
+    @Mock private OtpService otpService;
 
     @InjectMocks
     private AuthService authService;
@@ -68,7 +74,7 @@ class AuthServiceTest {
         request.setUsername("ghost");
         request.setPassword("password123");
 
-        assertThrows(UsernameNotFoundException.class, () -> authService.login(request));
+        assertThrows(AppException.class, () -> authService.login(request));
     }
 
     @Test
@@ -85,7 +91,7 @@ class AuthServiceTest {
         request.setUsername("admin");
         request.setPassword("wrongpass");
 
-        assertThrows(UsernameNotFoundException.class, () -> authService.login(request));
+        assertThrows(AppException.class, () -> authService.login(request));
     }
 
     // ========== REGISTER ==========
@@ -94,11 +100,11 @@ class AuthServiceTest {
     void register_shouldSaveCustomer_whenUsernameAvailable() {
         when(employeeRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(customerRepository.findByUsername("newuser")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("123456")).thenReturn("hashed");
+        when(passwordEncoder.encode("Password@123")).thenReturn("hashed");
 
         RegisterRequest request = new RegisterRequest();
         request.setUsername("newuser");
-        request.setPassword("123456");
+        request.setPassword("Password@123");
 
         authService.register(request);
 
@@ -115,7 +121,7 @@ class AuthServiceTest {
 
         RegisterRequest request = new RegisterRequest();
         request.setUsername("existinguser");
-        request.setPassword("123456");
+        request.setPassword("Password@123");
 
         assertThrows(RuntimeException.class, () -> authService.register(request));
         verify(customerRepository, never()).save(any());

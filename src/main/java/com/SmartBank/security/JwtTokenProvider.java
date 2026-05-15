@@ -71,4 +71,13 @@ public class JwtTokenProvider {
         return UUID.randomUUID().toString();
     }
 
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    public long getRemainingTime(String token) {
+        Date expiration = extractExpiration(token);
+        return Math.max(0, expiration.getTime() - System.currentTimeMillis());
+    }
+
 }

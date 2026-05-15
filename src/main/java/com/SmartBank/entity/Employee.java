@@ -26,4 +26,8 @@ public class Employee {
     private Role role; // EMPLOYEE, ADMIN
 
     private boolean enabled = true;
+
+    private boolean twoFactorEnabled = false;
+
+    private String secretKey;
 }

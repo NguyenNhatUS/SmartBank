@@ -38,8 +38,8 @@ Implemented in: [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src
 - **Request Body** ([RegisterRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/RegisterRequest.java)):
   ```json
   {
-    "username": "hoang_an",
-    "email": "an.hoang@example.com",
+    "username": "nguyen_nhat",
+    "email": "nhat.nguyen@example.com",
     "password": "SecurePassword123"
   }
   ```
@@ -56,16 +56,16 @@ Implemented in: [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src
 - **Request Body** ([LoginRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/LoginRequest.java)):
   ```json
   {
-    "username": "hoang_an",
+    "username": "nguyen_nhat",
     "password": "SecurePassword123"
   }
   ```
 - **Response** ([LoginResponse.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/LoginResponse.java)):
   ```json
   {
-    "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJob2FuZ19hbiIs...",
+    "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZ3V5ZW5fbmhhdCIs...",
     "refreshToken": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-    "username": "hoang_an",
+    "username": "nguyen_nhat",
     "role": "CUSTOMER"
   }
   ```
@@ -84,7 +84,7 @@ Implemented in: [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src
   {
     "accessToken": "eyJhbGciOiJIUzI1NiJ9.new_jwt_content...",
     "refreshToken": "550e8400-e29b-41d4-a716-446655440000",
-    "username": "hoang_an",
+    "username": "nguyen_nhat",
     "role": "CUSTOMER"
   }
   ```
@@ -132,8 +132,8 @@ Implemented in: [CustomerController.java](file:///d:/SmartBank_Project/SmartBank
 - **Request Body** ([CustomerRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/CustomerRequest.java)):
   ```json
   {
-    "fullName": "Nguyễn Hoàng An",
-    "email": "an.hoang@example.com",
+    "fullName": "Nguyen Nhat",
+    "email": "nhat.nguyen@example.com",
     "phone": "0987654321",
     "address": "123 Le Loi Street, District 1, HCMC",
     "dateOfBirth": "1995-10-15"
@@ -143,8 +143,8 @@ Implemented in: [CustomerController.java](file:///d:/SmartBank_Project/SmartBank
   ```json
   {
     "id": 1,
-    "fullName": "Nguyễn Hoàng An",
-    "email": "an.hoang@example.com",
+    "fullName": "Nguyen Nhat",
+    "email": "nhat.nguyen@example.com",
     "phone": "0987654321",
     "address": "123 Le Loi Street, District 1, HCMC",
     "dateOfBirth": "1995-10-15",
@@ -160,8 +160,8 @@ Implemented in: [CustomerController.java](file:///d:/SmartBank_Project/SmartBank
 - **Request Body** ([CustomerRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/CustomerRequest.java)):
   ```json
   {
-    "fullName": "Nguyễn Hoàng An (Updated)",
-    "email": "an.hoang.new@example.com",
+    "fullName": "Nguyen Nhat (Updated)",
+    "email": "nhat.nguyen.new@example.com",
     "phone": "0987654321",
     "address": "456 Nguyen Hue Street, District 1, HCMC",
     "dateOfBirth": "1995-10-15"
@@ -171,8 +171,8 @@ Implemented in: [CustomerController.java](file:///d:/SmartBank_Project/SmartBank
   ```json
   {
     "id": 1,
-    "fullName": "Nguyễn Hoàng An (Updated)",
-    "email": "an.hoang.new@example.com",
+    "fullName": "Nguyen Nhat (Updated)",
+    "email": "nhat.nguyen.new@example.com",
     "phone": "0987654321",
     "address": "456 Nguyen Hue Street, District 1, HCMC",
     "dateOfBirth": "1995-10-15",
@@ -213,7 +213,7 @@ Implemented in: [AccountController.java](file:///d:/SmartBank_Project/SmartBank/
     "status": "ACTIVE",
     "createdAt": "2026-05-21T15:05:00",
     "customerId": 1,
-    "customerName": "Nguyễn Hoàng An"
+    "customerName": "Nguyen Nhat"
   }
   ```
 
@@ -231,7 +231,7 @@ Implemented in: [AccountController.java](file:///d:/SmartBank_Project/SmartBank/
       "status": "ACTIVE",
       "createdAt": "2026-05-21T15:05:00",
       "customerId": 1,
-      "customerName": "Nguyễn Hoàng An"
+      "customerName": "Nguyen Nhat"
     }
   ]
   ```
@@ -249,7 +249,7 @@ Implemented in: [AccountController.java](file:///d:/SmartBank_Project/SmartBank/
     "status": "FROZEN",
     "createdAt": "2026-05-21T15:05:00",
     "customerId": 1,
-    "customerName": "Nguyễn Hoàng An"
+    "customerName": "Nguyen Nhat"
   }
   ```
 

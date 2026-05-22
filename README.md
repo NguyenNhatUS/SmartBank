@@ -4,7 +4,7 @@ This document provides a comprehensive guide to the primary API endpoints of the
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## ️ Tech Stack & Architecture
 - **Core Framework**: Java Spring Boot 3.x, Spring Security 6
 - **Database**: MySQL 8.0, Hibernate JPA
 - **Caching**: Redis (via Spring Cache abstractions)
@@ -13,7 +13,7 @@ This document provides a comprehensive guide to the primary API endpoints of the
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/main/java/com/SmartBank/
@@ -97,7 +97,7 @@ src/main/java/com/SmartBank/
 
 ---
 
-## 🔑 Authentication & Authorization
+##  Authentication & Authorization
 
 All secure endpoints require the client to supply a JSON Web Token (JWT) in the HTTP headers:
 ```http
@@ -111,7 +111,7 @@ Authorization: Bearer <your_access_token>
 
 ---
 
-## 📌 Core API Endpoints
+##  Core API Endpoints
 
 ### 1. Authentication Endpoints
 Implemented in: [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AuthController.java)
@@ -421,7 +421,7 @@ Implemented in: [TransactionController.java](file:///d:/SmartBank_Project/SmartB
 
 ---
 
-## ❌ Global Exception Handling
+##  Global Exception Handling
 
 In case of errors, the application returns a unified JSON error payload. The specific error codes are cataloged in [ErrorCode.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/enums/ErrorCode.java).
 

@@ -13,6 +13,90 @@ This document provides a comprehensive guide to the primary API endpoints of the
 
 ---
 
+## 📁 Project Structure
+
+```
+src/main/java/com/SmartBank/
+│
+├── SmartBankApplication.java
+│
+├── config/
+│   ├── RedisConfig.java
+│   └── SecurityConfig.java
+│
+├── controller/
+│   ├── AccountController.java
+│   ├── AuthController.java
+│   ├── CustomerController.java
+│   └── TransactionController.java
+│
+├── dto/
+│   ├── request/
+│   │   ├── AccountCreateRequest.java
+│   │   ├── CreateEmployeeRequest.java
+│   │   ├── CustomerRequest.java
+│   │   ├── DepositWithDrawRequest.java
+│   │   ├── LoginRequest.java
+│   │   ├── RefreshRequest.java
+│   │   ├── RegisterRequest.java
+│   │   └── TransferRequest.java
+│   │
+│   └── response/
+│       ├── AccountResponse.java
+│       ├── CustomerAccountResponse.java
+│       ├── CustomerResponse.java
+│       ├── ErrorResponse.java
+│       ├── LoginResponse.java
+│       └── TransactionResponse.java
+│
+├── entity/
+│   ├── Account.java
+│   ├── Customer.java
+│   ├── Employee.java
+│   ├── RefreshToken.java
+│   ├── Transaction.java
+│   └── enums/
+│       ├── AccountStatus.java
+│       ├── AccountType.java
+│       ├── CustomerStatus.java
+│       ├── ErrorCode.java
+│       ├── Role.java
+│       └── TransactionType.java
+│
+├── exception/
+│   ├── AppException.java
+│   ├── CustomAccessDeniedHandler.java
+│   ├── CustomAuthenticationEntryPoint.java
+│   └── GlobalExceptionHandler.java
+│
+├── mapper/
+│   ├── AccountMapper.java
+│   ├── CustomerMapper.java
+│   └── TransactionMapper.java
+│
+├── repository/
+│   ├── AccountRepository.java
+│   ├── CustomerRepository.java
+│   ├── EmployeeRepository.java
+│   ├── RefreshTokenRepository.java
+│   └── TransactionRepository.java
+│
+├── security/
+│   ├── JwtAuthenticationFilter.java
+│   ├── JwtTokenProvider.java
+│   ├── RateLimit.java
+│   └── RateLimitAspect.java
+│
+└── service/
+    ├── AccountService.java
+    ├── AuthService.java
+    ├── CustomUserDetailsService.java
+    ├── CustomerService.java
+    └── TransactionService.java
+```
+
+---
+
 ## 🔑 Authentication & Authorization
 
 All secure endpoints require the client to supply a JSON Web Token (JWT) in the HTTP headers:

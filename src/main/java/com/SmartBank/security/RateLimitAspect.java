@@ -7,16 +7,26 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class RateLimitAspect {
+
+    private static final RedisScript<Long> RATE_LIMIT_SCRIPT = RedisScript.of(
+            "local current = redis.call('incr', KEYS[1])\n" +
+            "if current == 1 then\n" +
+            "    redis.call('expire', KEYS[1], ARGV[1])\n" +
+            "end\n" +
+            "return current;",
+            Long.class
+    );
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -26,10 +36,11 @@ public class RateLimitAspect {
                 .getRequest();
         String key = generateKey(request);
 
-        Long count = redisTemplate.opsForValue().increment(key);
-        if (count != null && count == 1) {
-            redisTemplate.expire(key, rateLimit.duration(), TimeUnit.SECONDS);
-        }
+        Long count = redisTemplate.execute(
+                RATE_LIMIT_SCRIPT,
+                List.of(key),
+                String.valueOf(rateLimit.duration())
+        );
 
         if (count != null && count > rateLimit.requests()) {
             throw new AppException(ErrorCode.TOO_MANY_REQUESTS);

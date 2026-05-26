@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -29,6 +30,9 @@ class CustomerServiceTest {
     @Mock
     private CustomerMapper customerMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private CustomerService service;
 
@@ -44,6 +48,8 @@ class CustomerServiceTest {
                 .phone("0901234567")
                 .address("HCM")
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .username("nva")
+                .password("password123")
                 .build();
 
         customer = Customer.builder()
@@ -51,6 +57,8 @@ class CustomerServiceTest {
                 .fullName("Nguyen Van A")
                 .email("a@gmail.com")
                 .phone("0901234567")
+                .username("nva")
+                .password("encoded_password")
                 .status(CustomerStatus.ACTIVE)
                 .build();
 
@@ -67,7 +75,11 @@ class CustomerServiceTest {
 
         when(customerRepository.existsByPhone(request.getPhone())).thenReturn(false);
 
+        when(customerRepository.existsByUsername(request.getUsername())).thenReturn(false);
+
         when(customerMapper.toEntity(request)).thenReturn(customer);
+
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded_password");
 
         when(customerRepository.save(customer)).thenReturn(customer);
 
@@ -149,7 +161,7 @@ class CustomerServiceTest {
 
         assertEquals(customer.getStatus(), CustomerStatus.LOCKED);
 
-        verify(customerRepository, times(1)).deleteById(1L);
+        verify(customerRepository, times(1)).save(customer);
 
     }
 

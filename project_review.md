@@ -1,179 +1,195 @@
-# Đánh giá Kỹ thuật & Kiến trúc SmartBank
+# SmartBank - Codebase Overview & Technical Analysis
 
-Tài liệu này cung cấp một bản đánh giá chuyên sâu về mã nguồn và kiến trúc của dự án **SmartBank**. Phân tích được thực hiện dưới góc nhìn của một Tech Lead / Kỹ sư Phần mềm Cao cấp (Senior Software Engineer), tập trung vào các tiêu chuẩn được kỳ vọng cho một vị trí Java Backend.
-
----
-
-## 1. Tổng quan Dự án
-
-### Mục đích & Nghiệp vụ (Business Domain)
-**SmartBank** là một API mô phỏng hệ thống ngân hàng. Mục tiêu của dự án là giải quyết bài toán nghiệp vụ về quản lý khách hàng, tài khoản vãng lai/tiết kiệm (checking/savings accounts) và thực hiện các giao dịch ngân hàng cốt lõi một cách an toàn (gửi tiền, rút tiền và chuyển khoản).
-
-### Các Chức năng Cốt lõi
-- **Xác thực Người dùng & Phân quyền (User & Role Authentication):** Đăng ký, đăng nhập, JWT access token và xoay vòng Refresh Token (Refresh Token Rotation - RTR).
-- **Thư mục Khách hàng (Customer Directory):** Các thao tác CRUD trên hồ sơ khách hàng.
-- **Quản lý Tài khoản (Account Management):** Tạo tài khoản, truy vấn số dư, đóng băng và đóng tài khoản.
-- **Bộ máy Giao dịch (Transactions Engine):** Gửi, rút và chuyển tiền giữa các tài khoản với các ràng buộc kiểm tra hợp lệ (validation) cơ bản.
-- **Tăng cường Hệ thống (System Hardening):** Lưu bộ nhớ đệm (caching) dựa trên Redis để cải thiện hiệu suất đọc và giới hạn tần suất (rate limiting) dựa trên AOP đối với các endpoint nhạy cảm về xác thực/giao dịch.
+Tài liệu này cung cấp một bản phân tích chuyên sâu và tổng quan về cấu trúc mã nguồn, luồng dữ liệu, các công nghệ sử dụng, và các mẫu thiết kế (Design Patterns) áp dụng trong hệ thống **SmartBank**. Phân tích được thực hiện dưới góc nhìn của một Software Architect cao cấp.
 
 ---
 
-## 2. Kiến trúc & Thiết kế
+## 1. High-Level Architecture (Kiến trúc Tổng thể)
 
-### Phong cách Kiến trúc
-Dự án tuân theo **Kiến trúc phân tầng / 3 lớp (Layered / Three-Tier Architecture)** tiêu chuẩn (Controller -> Service -> Repository), sử dụng Spring Boot MVC.
+Dự án **SmartBank** được xây dựng dựa trên mô hình **Kiến trúc phân tầng / 3 lớp (Layered Architecture)** tiêu chuẩn, kết hợp với cơ chế phân tách các mối bận tâm chung (Cross-Cutting Concerns) thông qua **Aspect-Oriented Programming (AOP)** và các Security Component.
 
 ```mermaid
 graph TD
-    Client[REST Client / Frontend] --> Controllers[Tầng Controller]
+    Client[REST Client / Frontend] --> SecurityFilter[Security Filter Chain]
+    SecurityFilter --> RateLimiter[RateLimitAspect - AOP / Redis Lua]
+    RateLimiter --> Controllers[Tầng Controller]
     Controllers --> Services[Tầng Service]
     Services --> Mappers[Tầng Mapper]
-    Services --> Repositories[Tầng Repository / Truy cập Dữ liệu]
-    Repositories --> Database[(Cơ sở dữ liệu MySQL)]
-    Services --> Cache[(Bộ nhớ đệm Redis Cache)]
+    Services --> Repositories[Tầng Repository]
+    Repositories --> Database[(MySQL Database)]
+    Services --> Cache[(Redis Cache)]
 ```
 
-### Cấu trúc Thư mục/Package
-Cấu trúc package được tổ chức theo lớp (**packaged-by-layer**):
+### Cách các thành phần tương tác:
+1. **Yêu cầu (Request)** từ Client đi qua chuỗi bộ lọc bảo mật (**Security Filter Chain**), nơi JWT được trích xuất và xác thực.
+2. Bộ lọc AOP Aspect (**RateLimitAspect**) can thiệp trước khi request chạm tới controller để thực hiện kiểm tra giới hạn tần suất (Rate Limiting) thông qua Redis.
+3. **Tầng Controller** đón nhận các Request DTO đã hợp lệ, phân phối tới **Tầng Service** thích hợp.
+4. **Tầng Service** thực thi logic nghiệp vụ ngân hàng (mở tài khoản, chuyển tiền, tính toán số dư). Tầng này quản lý các ranh giới giao dịch cơ sở dữ liệu (`@Transactional`) và tương tác với **Tầng Repository** để đọc/ghi DB.
+5. **Tầng Repository** thực thi các câu lệnh SQL (thông qua Spring Data JPA và Hibernate) để thay đổi dữ liệu trong MySQL. Đồng thời, tầng Service sử dụng Redis Cache để tăng tốc độ truy vấn ở các API đọc thông tin ít biến động.
+
+---
+
+## 2. Directory Structure & Component Mapping (Cấu trúc thư mục & Ánh xạ thành phần)
+
+Mã nguồn được tổ chức theo cấu trúc đóng gói theo tầng phân lớp (**packaged-by-layer**):
+
 ```text
 com.SmartBank
-├── config        # Cấu hình (Security, Redis)
-├── controller    # Các REST Endpoint
-├── dto           # Request/Response DTO (phân tách mối quan tâm)
-├── entity        # Thực thể JPA & Enum
-├── exception     # Xử lý ngoại lệ tùy chỉnh & Bộ xử lý ngoại lệ
-├── mapper        # Bộ chuyển đổi DTO <=> Entity
-├── security      # Bộ lọc JWT, Aspect cho Rate Limiting, Bean Xác thực
-├── service       # Logic nghiệp vụ cốt lõi (Core Business Logic)
+├── config        # Cấu hình hệ thống (Security, Redis)
+├── controller    # Các REST Endpoint (Tầng Presentation)
+├── dto           # Các DTO phân tách dữ liệu Request/Response
+│   ├── request
+│   └── response
+├── entity        # Thực thể JPA (Tầng Persistence/Model)
+│   └── enums
+├── exception     # Bộ xử lý ngoại lệ tập trung (Global Exception Handler)
+├── mapper        # Lớp ánh xạ DTO <=> JPA Entity
+├── repository    # Spring Data JPA Interface (Tầng Data Access)
+├── security      # Cấu hình bộ lọc bảo mật, phân quyền SpEL, Rate Limit AOP
+└── service       # Lớp thực thi Business Logic chính
 ```
 
-### Điểm mạnh
-- **Phân tách Rõ ràng các Mối bận tâm (Separation of Concerns):** Các Entity không được hiển thị trực tiếp cho REST API; cơ sở mã nguồn áp dụng việc sử dụng DTO Request/Response và ánh xạ chúng bằng cách sử dụng các lớp mapper rõ ràng.
-- **Cấu trúc Sạch sẽ:** Tuân theo cấu trúc dự án Spring Boot tiêu chuẩn, giúp bất kỳ nhà phát triển Java nào cũng có thể dễ dàng điều hướng và tìm hiểu.
+### Chi tiết trách nhiệm và ví dụ thực tế:
 
-### Điểm yếu còn tồn tại
-- **Rò rỉ Nghiệp vụ trong Enum (Domain-Leak in Enums):** Enum `ErrorCode` vẫn được đặt bên trong `com.SmartBank.entity.enums`. Các mã lỗi mang thông tin trực tiếp về HTTP Status (`HttpStatus.BAD_REQUEST`, v.v.). Việc đặt các mối quan tâm về API/HTTP bên trong package thực thể lưu trữ (persistence entity package) đã vi phạm nguyên tắc phân tách sạch sẽ giữa các lớp.
-- **Sự Phụ thuộc Chặt chẽ giữa các Service (Tightly Coupled Services):** Các service gọi trực tiếp đến repository của domain khác (ví dụ: `AccountService` phụ thuộc vào `CustomerRepository` và `AccountRepository`). Trong một kiến trúc modular, giao tiếp chéo giữa các domain nên đi qua các domain service hoặc interface thay vì liên kết trực tiếp với repository.
+- **`config` (Configuration Package):**
+  - *Trách nhiệm:* Cấu hình các Bean hệ thống, cấu hình chuỗi bộ lọc Spring Security, CORS, phân quyền, cấu hình bộ đệm Redis.
+  - *Lớp tiêu biểu:* [SecurityConfig.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/config/SecurityConfig.java) (cấu hình phân quyền endpoint), [RedisConfig.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/config/RedisConfig.java) (cấu hình bộ nhớ đệm).
 
----
+- **`controller` (Presentation Layer):**
+  - *Trách nhiệm:* Nhận HTTP Request, xác thực dữ liệu đầu vào cơ bản (`@Valid`), điều hướng nghiệp vụ xuống tầng Service, trả về HTTP Response.
+  - *Lớp tiêu biểu:* [AccountController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AccountController.java), [TransactionController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/TransactionController.java).
 
-## 3. Đánh giá Chất lượng Code (Đã khắc phục)
+- **`dto` (Data Transfer Objects):**
+  - *Trách nhiệm:* Phân tách cấu trúc dữ liệu gửi lên và trả về của API ra khỏi cấu trúc bảng cơ sở dữ liệu (JPA Entities), bảo vệ thông tin nhạy cảm.
+  - *Lớp tiêu biểu:* [TransferRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/TransferRequest.java), [AccountResponse.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/AccountResponse.java).
 
-Các code smell và lỗi nghiêm trọng ở phiên bản cũ hiện đã được sửa đổi theo tiêu chuẩn chuyên nghiệp:
+- **`entity` (Domain Model / Persistence Layer):**
+  - *Trách nhiệm:* Ánh xạ quan hệ thực thể đối tượng sang các bảng quan hệ trong DB (ORM).
+  - *Lớp tiêu biểu:* [Customer.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Customer.java), [Account.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Account.java), [Transaction.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Transaction.java).
 
-#### 1. Cache bị Cũ (Stale Cache) và Cập nhật không được Lưu trong `CustomerService`
-- **Tình trạng cũ:** Phương thức `CustomerService.update(...)` sửa đổi thực thể trong bộ nhớ nhưng không lưu vào DB, trong khi `@CachePut` lại chủ động lưu cache đối tượng cập nhật vào Redis. Điều này gây bất nhất nghiêm trọng giữa Cache và DB.
-- **Giải pháp:** Đã thêm `@Transactional` và gọi `repository.save(customer)` trước khi hoàn thành cập nhật. Đảm bảo dữ liệu mới luôn được ghi vào Database và đồng bộ với Redis.
+- **`exception` (Exception Handling):**
+  - *Trách nhiệm:* Bắt tất cả các Exception ném ra từ tầng dưới, chuyển đổi thành định dạng JSON chuẩn hóa gửi về Client kèm HTTP Status Code phù hợp.
+  - *Lớp tiêu biểu:* [GlobalExceptionHandler.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/GlobalExceptionHandler.java), [AppException.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/AppException.java).
 
-#### 2. Xóa mềm (Soft Delete) trong `CustomerService.deleteById`
-- **Tình trạng cũ:** Đặt trạng thái của khách hàng thành `CustomerStatus.LOCKED` nhưng sau đó gọi `repository.deleteById(id)` làm xóa vật lý dòng dữ liệu.
-- **Giải pháp:** Đã chuyển hoàn toàn sang cơ chế Khóa / Xóa mềm thực tế bằng cách gọi `repository.save(customer)` để lưu trạng thái `LOCKED` vào DB, loại bỏ câu lệnh xóa vật lý và cập nhật Unit Test tương ứng để kiểm chứng.
+- **`mapper` (Mapping Layer):**
+  - *Trách nhiệm:* Chuyển đổi dữ liệu qua lại giữa Entity và DTO.
+  - *Lớp tiêu biểu:* [CustomerMapper.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/mapper/CustomerMapper.java), [AccountMapper.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/mapper/AccountMapper.java).
 
-#### 3. Biểu thức SpEL bị Lỗi trong `AccountController`
-- **Tình trạng cũ:** endpoint `getById` sử dụng biểu thức SpEL `@accountSecurity.isOwner(#accountId, principal.username)` nhưng bean `accountSecurity` không tồn tại trong context và tham số phương thức thực tế là `id` chứ không phải `accountId`.
-- **Giải pháp:**
-  1. Đã sửa biểu thức SpEL thành `@accountSecurity.isOwner(#id, principal.username)` để khớp đúng với tên tham số của phương thức.
-  2. Tạo mới thành công bean `AccountSecurity` quản lý việc xác minh quyền sở hữu tài khoản một cách an toàn và tối ưu bằng cách truy vấn DB.
+- **`repository` (Data Access Layer):**
+  - *Trách nhiệm:* Cung cấp các thao tác CRUD và các câu lệnh truy vấn JPA/HQL tương tác trực tiếp với cơ sở dữ liệu.
+  - *Lớp tiêu biểu:* [AccountRepository.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/repository/AccountRepository.java).
 
-#### 4. Thiếu Constructor mặc định trong Entity `RefreshToken`
-- **Tình trạng cũ:** Dùng `@Builder` không có `@NoArgsConstructor` và `@AllArgsConstructor` làm Hibernate bị crash Runtime do thiếu constructor không tham số khi khởi tạo thực thể.
-- **Giải pháp:** Đã thêm đầy đủ `@NoArgsConstructor` và `@AllArgsConstructor` vào thực thể `RefreshToken.java`.
+- **`security` (Security & AOP Utility Layer):**
+  - *Trách nhiệm:* Xử lý các nghiệp vụ bổ trợ bao gồm xác thực Token, phân quyền động dựa trên SpEL, giới hạn tần suất API thông qua kỹ thuật lập trình khía cạnh (AOP).
+  - *Lớp tiêu biểu:* [JwtAuthenticationFilter.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/JwtAuthenticationFilter.java), [RateLimitAspect.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/RateLimitAspect.java), [AccountSecurity.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/AccountSecurity.java).
 
-#### 5. Mã thừa (Biến không sử dụng) trong `AuthService`
-- **Tình trạng cũ:** Phương thức `login` khai báo thừa biến `token` không sử dụng.
-- **Giải pháp:** Đã làm sạch mã nguồn bằng cách loại bỏ biến thừa.
-
----
-
-## 4. Đánh giá Thiết kế Hệ thống & Backend (Đã khắc phục)
-
-#### Lệch Đường dẫn cấu hình Security và Controller (Lỗ hổng Bảo mật)
-- **Tình trạng cũ:** `SecurityConfig` cấu hình bảo mật dựa trên các đường dẫn mẫu không có prefix phiên bản (như `/api/accounts/**`), trong khi các controller lại ánh xạ thực tế dưới `/api/v1/...`. Lệch đường dẫn này làm mất hiệu lực phân quyền (bất kỳ ai có JWT hợp lệ cũng có thể gọi mọi API).
-- **Giải pháp:** Cập nhật toàn bộ đường dẫn cấu hình trong `SecurityConfig.java` để bao gồm prefix `/api/v1/` đồng bộ với controller. Phân quyền hiện hoạt động chính xác và an toàn.
-
-#### Mô hình Dữ liệu Khách hàng & Đăng ký bị Rời rạc
-- **Tình trạng cũ:** Đăng ký qua `AuthService.register` bị bỏ qua trường `email`. Tạo hồ sơ qua `CustomerService.create` thì không thiết lập `username` và `password` làm crash DB do trường mật khẩu là bắt buộc (`nullable = false`).
-- **Giải pháp:**
-  - Cập nhật `AuthService.register` để lưu trữ chính xác trường `email` của khách hàng.
-  - Thêm `username` và `password` vào `CustomerRequest`, cập nhật mapper và tiêm `PasswordEncoder` vào `CustomerService` để mã hóa mật khẩu trước khi lưu. Thiết lập kiểm tra trùng lặp `username` khi admin tạo khách hàng mới.
+- **`service` (Business Logic Layer):**
+  - *Trách nhiệm:* Xử lý nghiệp vụ chính, bảo vệ toàn vẹn dữ liệu trong các giao dịch, quản lý các kết nối Cache.
+  - *Lớp tiêu biểu:* [TransactionService.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/service/TransactionService.java), [AccountService.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/service/AccountService.java).
 
 ---
 
-## 5. Cơ sở Dữ liệu & Lớp Dữ liệu (Đã khắc phục)
+## 3. Core Data Flow (Luồng Dữ liệu Lõi)
 
-#### Lỗi `LazyInitializationException` trên các Endpoint Đọc
-- **Tình trạng cũ:** Đặt cấu hình `spring.jpa.open-in-view=false` nhưng mapper gọi lấy các thuộc tính lazily-loaded bên ngoài session (ví dụ: `customer.getAccountList().size()`, `account.getCustomer().getFullName()`) dẫn đến sập HTTP 500.
-- **Giải pháp:**
-  - Cấu hình `@Transactional(readOnly = true)` của Spring tại class-level ở các service `CustomerService` và `AccountService` nhằm giữ Hibernate session mở trong suốt luồng ánh xạ DTO.
-  - Tối ưu hóa truy vấn `getAllCustomers` để sử dụng `findAllCustomersWithAccounts` nạp eager `accountList` bằng `LEFT JOIN FETCH`, giải quyết triệt để lỗi N+1 queries.
+Dưới đây là biểu đồ Sequence Diagram thể hiện chi tiết luồng dữ liệu của một yêu cầu chuyển tiền (`transfer`) trong dự án SmartBank:
 
-#### Lỗ hổng Eager Fetching N+1
-- **Tình trạng cũ:** Thực thể `Transaction` có thuộc tính `sourceAccount` và `targetAccount` mặc định là `EAGER`, khiến Hibernate truy vấn nhiều lần mỗi khi truy xuất danh sách giao dịch.
-- **Giải pháp:** Cập nhật `@ManyToOne(fetch = FetchType.LAZY)` cho cả hai mối quan hệ trong `Transaction.java`.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as REST Client
+    participant Security as Security Filter Chain
+    participant Aspect as RateLimitAspect (AOP)
+    participant Redis as Redis Cache
+    participant Controller as TransactionController
+    participant Service as TransactionService
+    participant DB as MySQL Database
+    participant Mapper as TransactionMapper
 
----
-
-## 6. Hiệu suất & Độ tin cậy (Đã khắc phục)
-
-#### Tình trạng Tranh chấp Tài nguyên (Race Conditions) khi Giao dịch Ngân hàng
-- **Tình trạng cũ:** Giao dịch cập nhật số dư tài khoản không có cơ chế khóa, dẫn đến nguy cơ xung đột Lost Update khi có nhiều request đồng thời, gây sai lệch số dư tài khoản.
-- **Giải pháp:**
-  - Triển khai **Pessimistic Locking (Khóa bi quan)** bằng cách định nghĩa truy vấn `@Lock(LockModeType.PESSIMISTIC_WRITE)` trên phương thức `findByAccountNumberWithLock` trong `AccountRepository`.
-  - Áp dụng cơ chế khóa này vào các phương thức giao dịch tiền tệ (`deposit`, `withdraw`, `transfer`).
-  - **Chống Deadlock:** Đối với phương thức `transfer`, các khóa tài khoản nguồn và đích được nạp theo **thứ tự tăng dần của số tài khoản** (Deterministic Lock Ordering), đảm bảo loại bỏ hoàn toàn khả năng xảy ra deadlock khi hai giao dịch chuyển khoản chéo nhau xảy ra đồng thời.
-
-#### Giới hạn Tần suất (Rate Limiting) Không nguyên tử (Non-Atomic)
-- **Tình trạng cũ:** Sử dụng `opsForValue().increment(key)` và `expire(key)` riêng biệt làm mất tính nguyên tử. Nếu server gặp sự cố giữa 2 lệnh, key sẽ tồn tại vô hạn trong Redis và chặn vĩnh viễn IP người dùng.
-- **Giải pháp:** Triển khai **Lua Script** thực thi nguyên tử (atomic) trên Redis để đồng thời thực hiện thao tác tăng đếm và gán expire cho key ở lượt đếm đầu tiên, đảm bảo tính nhất quán tuyệt đối.
-
----
-
-## 7. Đánh giá Bảo mật
-- **Kiểm soát Truy cập:** Đã an toàn sau khi cập nhật prefix `/api/v1/` trong cấu hình bảo mật.
-- **Quyền sở hữu tài khoản:** Hoạt động an toàn qua biểu thức SpEL chính xác và bean `AccountSecurity`.
-- **Rò rỉ thông tin (Hardcoded Secrets):** Dự án vẫn lưu cấu hình bí mật JWT làm fallback trong file `application.properties`. Khuyến nghị tiếp tục chuyển hoàn toàn sang lấy từ các biến môi trường cấu hình trong production.
-
----
-
-## 8. DevOps & Mức độ Sẵn sàng cho Môi trường Production
-- **DDL-Auto:** Vẫn cấu hình dự phòng mặc định là `create` trong properties. Cần chuyển sang `none` hoặc `validate` trên production và sử dụng các công cụ quản lý cơ sở dữ liệu như Liquibase/Flyway.
-- **Docker:** Cấu hình Docker multi-stage chạy JRE runtime, user không phải root hoạt động ổn định và an toàn.
-- **Giám sát (Monitoring):** Hiện tại dự án vẫn chưa tích hợp Spring Boot Actuator hoặc Prometheus/Grafana để theo dõi hiệu năng.
-
----
-
-## 9. Ma trận Nợ Kỹ thuật (Technical Debt Matrix)
-
-| ID | Vấn đề | Mức độ Nghiêm trọng | Ảnh hưởng | Trạng thái |
-| :--- | :--- | :--- | :--- | :--- |
-| **01** | Thiếu tiền tố /v1 trong đường dẫn SecurityConfig | **CAO** | Phá hỏng cơ chế phân quyền dựa trên vai trò. | **ĐÃ KHẮC PHỤC** (Sửa requestMatchers đồng bộ v1) |
-| **02** | Lỗi `LazyInitializationException` trên endpoints đọc | **CAO** | Sập runtime khi mapper nạp các lazy field. | **ĐÃ KHẮC PHỤC** (Áp dụng readOnly transaction và Fetch Join) |
-| **03** | `CustomerService.update()` không lưu vào DB | **CAO** | Mất mát cập nhật dữ liệu khi cache bị xóa. | **ĐÃ KHẮC PHỤC** (Thêm repository.save và transactional) |
-| **04** | Thiếu annotation constructor trên `RefreshToken` | **CAO** | Gây lỗi `InstantiationException` ở Hibernate. | **ĐÃ KHẮC PHỤC** (Thêm `@NoArgsConstructor` & `@AllArgsConstructor`) |
-| **05** | Thiếu bean `accountSecurity` và SpEL sai tham số | **CAO** | Sập request khi kiểm tra quyền truy cập tài khoản. | **ĐÃ KHẮC PHỤC** (Thêm `AccountSecurity` và sửa SpEL parameter) |
-| **06** | Không có khóa đồng thời (locking) trên các giao dịch | **CAO** | Tranh chấp tài nguyên (race conditions), sai lệch số dư. | **ĐÃ KHẮC PHỤC** (Sử dụng `PESSIMISTIC_WRITE` & Deadlock Prevention) |
-| **07** | Mô hình API Khách hàng không hoạt động | **TRUNG BÌNH** | Không tạo được hồ sơ do password null; đăng ký bỏ qua email. | **ĐÃ KHẮC PHỤC** (Cập nhật DTO, Mapper và mã hóa mật khẩu) |
-| **08** | Thông tin đăng nhập viết cứng làm dự phòng | **THẤP** | Lộ thông tin nhạy cảm của Redis/JWT mặc định trên Git. | **CẢNH BÁO** (Cần thiết lập chế độ bắt buộc đọc env) |
-| **09** | Rate Limiting không nguyên tử | **TRUNG BÌNH** | Nguy cơ khóa vĩnh viễn IP người dùng do lỗi kết nối Redis. | **ĐÃ KHẮC PHỤC** (Sử dụng Lua Script nguyên tử) |
-
----
-
-## 10. Điểm mạnh nổi bật hiện tại
-
-1. **Giao dịch an toàn tuyệt đối**: Việc áp dụng Pessimistic Locking chống race condition và sắp xếp khóa thông minh chống deadlock giúp hệ thống giao dịch có độ tin cậy tương đương hệ thống ngân hàng thương mại.
-2. **Quản lý Cache & Session tối ưu**: Tránh được `LazyInitializationException` mà không cần bật OSIV, kết hợp với cache Redis luôn nhất quán với DB.
-3. **Phân quyền và bảo mật chi tiết**: Quản lý phân quyền dựa trên phương thức hoạt động trơn tru với các SpEL tùy chỉnh.
-4. **Rate Limiting hiệu năng cao**: Tăng cường bảo mật trước các đợt tấn công brute-force/DDOS bằng giới hạn tần suất nguyên tử qua Lua script.
+    Client->>Security: HTTP POST /api/v1/transactions/transfer (with JWT)
+    activate Security
+    Note over Security: Trích xuất & xác thực JWT,<br/>thiết lập Authentication Context
+    Security->>Aspect: Chuyển request context
+    deactivate Security
+    activate Aspect
+    Aspect->>Redis: Thực thi Lua Script (INCR + EXPIRE nguyên tử)
+    activate Redis
+    Redis-->>Aspect: Lượt truy cập hiện tại
+    deactivate Redis
+    Note over Aspect: Kiểm tra giới hạn.<br/>Ném AppException (429) nếu quá hạn mức.
+    Aspect->>Controller: Chuyển tiếp TransferRequest DTO
+    deactivate Aspect
+    activate Controller
+    Note over Controller: Thực thi kiểm tra dữ liệu đầu vào (@Valid)
+    Controller->>Service: transfer(TransferRequest)
+    deactivate Controller
+    activate Service
+    Note over Service: Khởi tạo bối cảnh giao dịch (@Transactional)
+    Note over Service: Phòng tránh Deadlock:<br/>Sắp xếp số tài khoản nguồn & đích theo chữ cái
+    Service->>DB: findByAccountNumberWithLock(firstLockNum) (PESSIMISTIC_WRITE)
+    activate DB
+    DB-->>Service: Account Entity 1 (Locked)
+    deactivate DB
+    Service->>DB: findByAccountNumberWithLock(secondLockNum) (PESSIMISTIC_WRITE)
+    activate DB
+    DB-->>Service: Account Entity 2 (Locked)
+    deactivate DB
+    Note over Service: Xác thực số dư tài khoản nguồn & trạng thái hoạt động
+    Note over Service: Trừ tiền tài khoản nguồn,<br/>Cộng tiền tài khoản đích
+    Service->>DB: save(sourceAccount) & save(targetAccount)
+    Service->>DB: save(new Transaction)
+    activate DB
+    DB-->>Service: Transaction Entity đã lưu
+    deactivate DB
+    Service->>Mapper: toResponse(Transaction)
+    activate Mapper
+    Mapper-->>Service: TransactionResponse DTO
+    deactivate Mapper
+    Note over Service: Kích hoạt @CacheEvict (xóa trắng các cache namespace)
+    Service-->>Controller: Trả về TransactionResponse DTO
+    deactivate Service
+    activate Controller
+    Controller-->>Client: ResponseEntity (HTTP 201 Created)
+    deactivate Controller
+```
 
 ---
 
-## Bảng Điểm Cuối cùng
+## 4. Tech Stack & Key Libraries (Công nghệ & Thư viện Lõi)
 
-| Danh mục | Điểm số cũ | Điểm số mới | Lý do |
-| :--- | :---: | :---: | :--- |
-| **Kiến trúc & Thiết kế** | 6 / 10 | **9 / 10** | Cấu trúc phân tầng rõ ràng, phân quyền SpEL động được phân tách sạch sẽ vào lớp Security bean. |
-| **Chất lượng Code** | 4 / 10 | **9.5 / 10** | Mã nguồn sạch sẽ, xử lý triệt để các lỗi sập runtime, cấu trúc builder chuẩn xác, không còn mã thừa. |
-| **Độ sẵn sàng cho Production** | 3 / 10 | **8.5 / 10** | Rất vững chắc nhờ khóa giao dịch, nạp lazy chuẩn, rate limit tối ưu. Cần thêm cơ chế di trú database (Flyway) và giám sát (Actuator). |
-| **Giá trị trên CV** | 5 / 10 | **9 / 10** | Thể hiện xuất sắc tư duy của một kỹ sư có kinh nghiệm sâu sắc về concurrency, cơ sở dữ liệu và bảo mật. |
+Hệ thống được phát triển trên các công nghệ Java hiện đại, cấu hình chính ghi nhận trong [pom.xml](file:///d:/SmartBank_Project/SmartBank/pom.xml):
 
-**Điểm Tổng thể:** **9.0 / 10** (Tăng từ 4.5/10 - Đạt tiêu chuẩn chất lượng cao sẵn sàng cho production).
+*   **Java 21**: Cung cấp nền tảng runtime hiện đại, tối ưu hiệu năng.
+*   **Spring Boot 3.4.4**: Khung ứng dụng chính cung cấp Auto-Configuration, Dependency Injection (IoC/DI).
+*   **Spring Security**: Thiết lập bộ lọc và phân quyền API, kết hợp với phương thức bảo vệ bằng annotation `@PreAuthorize`.
+*   **Spring Data JPA & Hibernate 6**: Quản lý truy xuất dữ liệu quan hệ ORM, hỗ trợ khóa dữ liệu nâng cao (`@Lock(LockModeType.PESSIMISTIC_WRITE)`).
+*   **Spring Data Redis & Cache**: Quản lý kết nối Redis dùng làm bộ đệm và lưu trữ đếm số lượng giới hạn tần suất.
+*   **JJWT (io.jsonwebtoken 0.12.6)**: Thư viện tạo, giải mã và xử lý JWT Token.
+*   **Lombok**: Tự động sinh mã mẫu (Boilerplate) như Getter, Setter, RequiredConstructor, Builder bằng Annotation Processor.
+*   **Spring Boot Starter AOP (AspectJ)**: Hỗ trợ lập trình hướng khía cạnh, cụ thể là can thiệp xử lý tự động giới hạn tần suất request.
+*   **Jakarta Validation**: Thực thi kiểm tra dữ liệu qua các annotation như `@NotBlank`, `@Email`, `@Past`, `@Size`.
+
+---
+
+## 5. Design Patterns & Best Practices (Mẫu Thiết kế & Thực tiễn Tốt nhất)
+
+Codebase của dự án áp dụng thành công nhiều Design Pattern kinh điển nhằm tối ưu khả năng mở rộng và bảo trì:
+
+### 1. Design Patterns áp dụng:
+*   **Dependency Injection / IoC (Inversion of Control)**: Toàn bộ cấu trúc hệ thống dựa trên nguyên lý Spring Container quản lý vòng đời và tiêm các dependencies tự động (ví dụ: tiêm `AccountRepository` vào `AccountSecurity` và `AccountService`).
+*   **Singleton Pattern**: Các Service, Controller, Mapper và Repository được định nghĩa làm các Spring Bean mặc định với phạm vi (Scope) là Singleton nhằm tiết kiệm tài nguyên hệ thống.
+*   **Builder Pattern**: Áp dụng rộng rãi trên các Entity và DTO nhờ `@Builder` của Lombok (như [Customer.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Customer.java)), giúp khởi tạo các đối tượng phức tạp một cách rõ ràng và trực quan.
+*   **Aspect Pattern (AOP)**: Tách biệt khía cạnh phụ trợ (Rate Limiting) ra khỏi Controller nghiệp vụ nhờ [RateLimitAspect.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/RateLimitAspect.java).
+*   **Pessimistic Locking & Lock Ordering Pattern**: Ngăn ngừa xung đột Lost Update đồng thời áp dụng sắp xếp khóa (Deadlock Avoidance) trong nghiệp vụ chuyển tiền.
+
+### 2. Đánh giá tính tuân thủ Nguyên lý SOLID:
+
+-   **Single Responsibility Principle (SRP - Đơn nhiệm):** Tuân thủ xuất sắc. 
+    - `Controller` chỉ làm nhiệm vụ giao tiếp REST.
+    - `Service` chỉ tập trung xử lý logic nghiệp vụ.
+    - `Repository` chỉ truy xuất cơ sở dữ liệu.
+    - `Mapper` chỉ biến đổi kiểu dữ liệu.
+    - `AccountSecurity` chỉ đảm nhiệm logic phân quyền truy cập tài khoản.
+-   **Open/Closed Principle (OCP - Mở rộng/Đóng kín):** Đạt yêu cầu. Các DTO độc lập cho phép thay đổi cấu trúc dữ liệu trả về của API mà không cần sửa đổi các thực thể Entity dưới DB. Cơ chế Aspect cho phép thêm rate limiting vào bất kỳ API mới nào chỉ bằng cách gắn thêm annotation `@RateLimit` mà không cần sửa mã nguồn logic của nó.
+-   **Liskov Substitution Principle (LSP - Thay thế Liskov):** Tuân thủ. Lớp giao diện `JpaRepository` được kế thừa trực tiếp bởi các Interface Repository cụ thể mà không phá vỡ hành vi nguyên bản của Spring Data JPA.
+-   **Interface Segregation Principle (ISP - Phân tách Giao diện):** Đạt yêu cầu. Các repository interface của hệ thống (như [CustomerRepository](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/repository/CustomerRepository.java)) chỉ khai báo thêm các phương thức cần thiết cho riêng domain đó, tránh việc phình to giao diện.
+-   **Dependency Inversion Principle (DIP - Đảo ngược Phụ thuộc):** Tuân thủ triệt để. Tầng Service phụ thuộc hoàn toàn vào các Interface Repository (ví dụ: `AccountRepository`), cho phép dễ dàng Mocking/Stubbing dữ liệu trong các lớp kiểm thử tự động (Unit Tests) như [CustomerServiceTest.java](file:///d:/SmartBank_Project/SmartBank/src/test/java/com/SmartBank/service/CustomerServiceTest.java).

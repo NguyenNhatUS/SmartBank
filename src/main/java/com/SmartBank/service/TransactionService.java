@@ -37,7 +37,10 @@ public class TransactionService {
     @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
             "customers" }, allEntries = true)
     public TransactionResponse deposit(@Valid DepositWithDrawRequest request) {
-        Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
+        if (request.getAccountNumber() == null) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+        Account account = accountRepository.findByAccountNumberWithLock(request.getAccountNumber());
 
         if (account == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -70,7 +73,10 @@ public class TransactionService {
     @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
             "customers" }, allEntries = true)
     public TransactionResponse withdraw(@Valid DepositWithDrawRequest request) {
-        Account account = accountRepository.findByAccountNumber(request.getAccountNumber());
+        if (request.getAccountNumber() == null) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+        Account account = accountRepository.findByAccountNumberWithLock(request.getAccountNumber());
 
         if (account == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -103,9 +109,25 @@ public class TransactionService {
     @org.springframework.cache.annotation.CacheEvict(value = { "accounts", "accounts_customers",
             "customers" }, allEntries = true)
     public TransactionResponse transfer(@Valid TransferRequest request) {
-        Account source = accountRepository.findByAccountNumber(request.getSourceAccountNumber());
+        if (request.getSourceAccountNumber() == null || request.getTargetAccountNumber() == null) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
 
-        Account target = accountRepository.findByAccountNumber(request.getTargetAccountNumber());
+        if (request.getSourceAccountNumber().equals(request.getTargetAccountNumber())) {
+            throw new AppException(ErrorCode.SAME_ACCOUNT_TRANSFER);
+        }
+
+        // Lock in sorted order to avoid deadlock
+        String firstLockNum = request.getSourceAccountNumber().compareTo(request.getTargetAccountNumber()) < 0
+                ? request.getSourceAccountNumber() : request.getTargetAccountNumber();
+        String secondLockNum = request.getSourceAccountNumber().compareTo(request.getTargetAccountNumber()) < 0
+                ? request.getTargetAccountNumber() : request.getSourceAccountNumber();
+
+        Account firstLock = accountRepository.findByAccountNumberWithLock(firstLockNum);
+        Account secondLock = accountRepository.findByAccountNumberWithLock(secondLockNum);
+
+        Account source = request.getSourceAccountNumber().equals(firstLockNum) ? firstLock : secondLock;
+        Account target = request.getTargetAccountNumber().equals(firstLockNum) ? firstLock : secondLock;
 
         if (source == null || target == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);

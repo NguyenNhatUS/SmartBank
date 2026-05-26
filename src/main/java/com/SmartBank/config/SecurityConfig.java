@@ -44,15 +44,15 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         // ── Customer: self-service ───────────────────────
-                        .requestMatchers(HttpMethod.GET, "/api/accounts/my").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.POST, "/api/accounts/my").hasRole("CUSTOMER")
-                        .requestMatchers("/api/transactions/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accounts/my").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/accounts/my").hasRole("CUSTOMER")
+                        .requestMatchers("/api/v1/transactions/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
 
                         // ── Staff operations ─────────────────────────────
-                        .requestMatchers("/api/accounts/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers("/api/v1/accounts/**").hasAnyRole("EMPLOYEE", "ADMIN")
 
                         // ── Admin only ───────────────────────────────────
-                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/customers/**").hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated())

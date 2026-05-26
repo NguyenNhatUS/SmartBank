@@ -75,7 +75,7 @@ class TransactionServiceTest {
 
     @Test
     void deposit_shouldIncreaseBalance_whenValidRequest() {
-        when(accountRepository.findByAccountNumber(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
 
         when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -90,7 +90,7 @@ class TransactionServiceTest {
 
     @Test
     public void withdraw_shouldThrow_whenInsufficientFunds() {
-        when(accountRepository.findByAccountNumber(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
 
         DepositWithDrawRequest withDrawRequest =
         DepositWithDrawRequest.builder()
@@ -108,7 +108,7 @@ class TransactionServiceTest {
 
     @Test
     public void withdraw_shouldDecreaseBalance_whenValidRequest() {
-        when(accountRepository.findByAccountNumber(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(depositRequest.getAccountNumber())).thenReturn(sourceAccount);
 
         when(mapper.toResponse((any()))).thenAnswer(i -> i.getArgument(0));
 
@@ -121,9 +121,9 @@ class TransactionServiceTest {
 
     @Test
     public void transfer_shouldSucceed_whenValidRequest() {
-        when(accountRepository.findByAccountNumber(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
 
-        when(accountRepository.findByAccountNumber(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
 
         when(mapper.toResponse((any()))).thenAnswer(i -> i.getArgument(0));
 
@@ -141,9 +141,9 @@ class TransactionServiceTest {
 
     @Test
     public void transfer_shouldThrow_whenInsufficientFunds() {
-        when(accountRepository.findByAccountNumber(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
 
-        when(accountRepository.findByAccountNumber(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
 
         transferRequest.setAmount(new BigDecimal("999999999"));
 
@@ -161,9 +161,9 @@ class TransactionServiceTest {
         sourceAccount.setStatus(AccountStatus.FROZEN);
         targetAccount.setStatus(AccountStatus.FROZEN);
 
-        when(accountRepository.findByAccountNumber(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getSourceAccountNumber())).thenReturn(sourceAccount);
 
-        when(accountRepository.findByAccountNumber(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
+        when(accountRepository.findByAccountNumberWithLock(transferRequest.getTargetAccountNumber())).thenReturn(targetAccount);
 
         assertThatThrownBy(() -> service.transfer(transferRequest)).isInstanceOf(AppException.class)
                 .hasMessageContaining("Account is inactive");

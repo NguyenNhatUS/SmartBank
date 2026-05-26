@@ -14,6 +14,7 @@ public class CustomerMapper {
                 .phone(request.getPhone())
                 .address(request.getAddress())
                 .dateOfBirth(request.getDateOfBirth())
+                .username(request.getUsername())
                 .build();
     }
 

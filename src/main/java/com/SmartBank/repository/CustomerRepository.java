@@ -14,6 +14,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     Optional<Customer> findByUsername(String username);
 
+    boolean existsByUsername(String username);
+
     @Query("SELECT DISTINCT c FROM Customer c LEFT JOIN FETCH c.accountList")
     List<Customer> findAllCustomersWithAccounts();
 }

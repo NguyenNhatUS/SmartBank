@@ -89,68 +89,75 @@ com.SmartBank
 
 ---
 
-## 3. Core Data Flow (Luồng Dữ liệu Lõi)
+## 3. Core Data Flow & Class Diagram (Mối quan hệ lớp & Luồng nghiệp vụ)
 
-Dưới đây là biểu đồ Sequence Diagram thể hiện chi tiết luồng dữ liệu của một yêu cầu chuyển tiền (`transfer`) trong dự án SmartBank:
+Dưới đây là biểu đồ Class Diagram thể hiện cấu trúc và mối quan hệ giữa các thành phần tham gia vào luồng nghiệp vụ giao dịch lõi (`deposit`, `withdraw`, `transfer`):
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Client as REST Client
-    participant Security as Security Filter Chain
-    participant Aspect as RateLimitAspect (AOP)
-    participant Redis as Redis Cache
-    participant Controller as TransactionController
-    participant Service as TransactionService
-    participant DB as MySQL Database
-    participant Mapper as TransactionMapper
+classDiagram
+    class TransactionController {
+        -TransactionService service
+        +deposit(DepositWithDrawRequest) ResponseEntity
+        +withdraw(DepositWithDrawRequest) ResponseEntity
+        +transfer(TransferRequest) ResponseEntity
+    }
 
-    Client->>Security: HTTP POST /api/v1/transactions/transfer (with JWT)
-    activate Security
-    Note over Security: Trích xuất & xác thực JWT,<br/>thiết lập Authentication Context
-    Security->>Aspect: Chuyển request context
-    deactivate Security
-    activate Aspect
-    Aspect->>Redis: Thực thi Lua Script (INCR + EXPIRE nguyên tử)
-    activate Redis
-    Redis-->>Aspect: Lượt truy cập hiện tại
-    deactivate Redis
-    Note over Aspect: Kiểm tra giới hạn.<br/>Ném AppException (429) nếu quá hạn mức.
-    Aspect->>Controller: Chuyển tiếp TransferRequest DTO
-    deactivate Aspect
-    activate Controller
-    Note over Controller: Thực thi kiểm tra dữ liệu đầu vào (@Valid)
-    Controller->>Service: transfer(TransferRequest)
-    deactivate Controller
-    activate Service
-    Note over Service: Khởi tạo bối cảnh giao dịch (@Transactional)
-    Note over Service: Phòng tránh Deadlock:<br/>Sắp xếp số tài khoản nguồn & đích theo chữ cái
-    Service->>DB: findByAccountNumberWithLock(firstLockNum) (PESSIMISTIC_WRITE)
-    activate DB
-    DB-->>Service: Account Entity 1 (Locked)
-    deactivate DB
-    Service->>DB: findByAccountNumberWithLock(secondLockNum) (PESSIMISTIC_WRITE)
-    activate DB
-    DB-->>Service: Account Entity 2 (Locked)
-    deactivate DB
-    Note over Service: Xác thực số dư tài khoản nguồn & trạng thái hoạt động
-    Note over Service: Trừ tiền tài khoản nguồn,<br/>Cộng tiền tài khoản đích
-    Service->>DB: save(sourceAccount) & save(targetAccount)
-    Service->>DB: save(new Transaction)
-    activate DB
-    DB-->>Service: Transaction Entity đã lưu
-    deactivate DB
-    Service->>Mapper: toResponse(Transaction)
-    activate Mapper
-    Mapper-->>Service: TransactionResponse DTO
-    deactivate Mapper
-    Note over Service: Kích hoạt @CacheEvict (xóa trắng các cache namespace)
-    Service-->>Controller: Trả về TransactionResponse DTO
-    deactivate Service
-    activate Controller
-    Controller-->>Client: ResponseEntity (HTTP 201 Created)
-    deactivate Controller
+    class TransactionService {
+        -TransactionRepository transactionRepository
+        -AccountRepository accountRepository
+        -TransactionMapper mapper
+        +deposit(DepositWithDrawRequest) TransactionResponse
+        +withdraw(DepositWithDrawRequest) TransactionResponse
+        +transfer(TransferRequest) TransactionResponse
+    }
+
+    class AccountRepository {
+        <<interface>>
+        +existsByAccountNumber(String) boolean
+        +findByAccountNumber(String) Account
+        +findByAccountNumberWithLock(String) Account
+    }
+
+    class TransactionRepository {
+        <<interface>>
+    }
+
+    class TransactionMapper {
+        +toResponse(Transaction) TransactionResponse
+    }
+
+    class Account {
+        -Long id
+        -String accountNumber
+        -BigDecimal balance
+        -AccountStatus status
+        -Customer customer
+    }
+
+    class Transaction {
+        -Long id
+        -String transactionCode
+        -TransactionType type
+        -BigDecimal amount
+        -Account sourceAccount
+        -Account targetAccount
+    }
+
+    TransactionController --> TransactionService : calls
+    TransactionService --> AccountRepository : queries
+    TransactionService --> TransactionRepository : saves
+    TransactionService --> TransactionMapper : maps
+    AccountRepository ..> Account : manages
+    TransactionRepository ..> Transaction : manages
+    Transaction --> Account : references (source & target)
 ```
+
+### Quy trình đi của luồng dữ liệu (Data Flow Steps):
+1. **Client** gửi yêu cầu POST `/api/v1/transactions/transfer` kèm dữ liệu `TransferRequest`.
+2. **TransactionController** nhận DTO, thực thi validation và gọi `TransactionService.transfer(...)`.
+3. **TransactionService** mở transaction (`@Transactional`), sắp xếp thứ tự tài khoản theo alphabet để tránh deadlock, gọi `AccountRepository.findByAccountNumberWithLock(...)` áp dụng khóa bi quan (`PESSIMISTIC_WRITE`) lên hai tài khoản.
+4. Nghiệp vụ được xử lý trên hai thực thể `Account` (trừ tiền nguồn, cộng tiền đích), lưu lại DB và ghi thêm thực thể `Transaction` mới.
+5. **TransactionMapper** chuyển đổi kết quả thành `TransactionResponse` trả về Controller để đóng gói thành HTTP 201 trả về Client.
 
 ---
 

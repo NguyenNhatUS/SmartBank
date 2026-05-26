@@ -55,8 +55,6 @@ public class AuthService {
             throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        String token = jwtUtil.generateToken(username, role);
-
         String accessToken = jwtUtil.generateToken(username, role);
         String refreshToken = createRefreshToken(username, role);
 
@@ -113,6 +111,7 @@ public class AuthService {
         Customer customer = Customer
                 .builder()
                 .username(request.getUsername())
+                .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .enabled(true)
                 .build();

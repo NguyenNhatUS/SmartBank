@@ -28,4 +28,10 @@ public class CustomerRequest {
     @NotNull(message = "dob can not be null")
     @Past(message = "The dob must be in the past")
     private LocalDate dateOfBirth;
+
+    @NotBlank(message = "Username can not be null")
+    private String username;
+
+    @NotBlank(message = "Password can not be null")
+    private String password;
 }

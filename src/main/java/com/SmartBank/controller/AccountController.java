@@ -27,7 +27,7 @@ public class AccountController {
                 .body(service.create(request));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @accountSecurity.isOwner(#accountId, principal.username)")
+    @PreAuthorize("hasRole('ADMIN') or @accountSecurity.isOwner(#id, principal.username)")
     @GetMapping("/{id}")
     public ResponseEntity<AccountResponse> getById(@PathVariable Long id, Principal principal) {
         return ResponseEntity.ok(service.getByID(id));

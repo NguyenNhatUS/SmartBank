@@ -35,11 +35,11 @@ public class Transaction {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_account", nullable = false)
     private Account sourceAccount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_account")
     private Account targetAccount;
 

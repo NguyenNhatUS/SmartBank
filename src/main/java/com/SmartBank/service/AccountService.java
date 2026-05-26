@@ -13,11 +13,13 @@ import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
 
 @Service
+@Transactional(readOnly = true)
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -32,6 +34,7 @@ public class AccountService {
         this.customerRepository = customerRepository;
     }
 
+    @Transactional
     public AccountResponse create(AccountCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
                 () -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND)
@@ -60,6 +63,7 @@ public class AccountService {
         return mapper.toResponse(account);
     }
 
+    @Transactional
     public AccountResponse freeze(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
@@ -68,6 +72,7 @@ public class AccountService {
         return mapper.toResponse(accountRepository.save(account));
     }
 
+    @Transactional
     public AccountResponse close(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
@@ -105,6 +110,7 @@ public class AccountService {
                 .toList();
     }
 
+    @Transactional
     public AccountResponse createAccountForCustomer(String username, AccountCreateRequest request) {
         Customer customer = customerRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));

@@ -34,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Project review documentation
+project_review.md

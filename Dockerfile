@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN ./mvnw package -DskipTests -B
 
 
 
-FROM eclipse-temurin:24-jre AS runtime
+FROM eclipse-temurin:21-jre AS runtime
 
 WORKDIR /app
 

@@ -8,6 +8,8 @@ import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
 import com.SmartBank.entity.RefreshToken;
 import com.SmartBank.entity.enums.Role;
+import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.AppException;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
@@ -17,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -68,7 +69,8 @@ class AuthServiceTest {
         request.setUsername("ghost");
         request.setPassword("password123");
 
-        assertThrows(UsernameNotFoundException.class, () -> authService.login(request));
+        AppException exception = assertThrows(AppException.class, () -> authService.login(request));
+        assertEquals(ErrorCode.CUSTOMER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -85,7 +87,8 @@ class AuthServiceTest {
         request.setUsername("admin");
         request.setPassword("wrongpass");
 
-        assertThrows(UsernameNotFoundException.class, () -> authService.login(request));
+        AppException exception = assertThrows(AppException.class, () -> authService.login(request));
+        assertEquals(ErrorCode.INVALID_USERNAME_OR_PASSWORD, exception.getErrorCode());
     }
 
     // ========== REGISTER ==========

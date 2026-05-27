@@ -1,6 +1,5 @@
-package com.SmartBank.dto.response;
+package com.SmartBank.exception;
 
-import com.SmartBank.entity.enums.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

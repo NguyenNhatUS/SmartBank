@@ -8,7 +8,7 @@ import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
 import com.SmartBank.entity.RefreshToken;
 import com.SmartBank.entity.enums.Role;
-import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.exception.AppException;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;

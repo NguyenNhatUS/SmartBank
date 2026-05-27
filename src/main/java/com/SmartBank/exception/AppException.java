@@ -1,7 +1,5 @@
 package com.SmartBank.exception;
 
-import com.SmartBank.entity.enums.ErrorCode;
-
 
 public class AppException extends RuntimeException {
 

@@ -1,9 +1,9 @@
 package com.SmartBank.config;
 
-import com.SmartBank.exception.CustomAccessDeniedHandler;
-import com.SmartBank.exception.CustomAuthenticationEntryPoint;
+import com.SmartBank.security.handler.CustomAccessDeniedHandler;
+import com.SmartBank.security.handler.CustomAuthenticationEntryPoint;
 import com.SmartBank.security.JwtAuthenticationFilter;
-import com.SmartBank.service.CustomUserDetailsService;
+import com.SmartBank.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

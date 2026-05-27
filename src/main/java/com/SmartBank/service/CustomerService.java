@@ -3,7 +3,7 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
-import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.exception.AppException;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;

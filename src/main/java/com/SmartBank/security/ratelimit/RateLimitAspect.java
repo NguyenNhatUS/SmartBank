@@ -1,6 +1,6 @@
-package com.SmartBank.security;
+package com.SmartBank.security.ratelimit;
 
-import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.exception.AppException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

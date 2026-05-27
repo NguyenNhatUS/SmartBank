@@ -1,7 +1,5 @@
 package com.SmartBank.exception;
 
-import com.SmartBank.dto.response.ErrorResponse;
-import com.SmartBank.entity.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

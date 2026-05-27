@@ -1,4 +1,4 @@
-package com.SmartBank.security;
+package com.SmartBank.security.ratelimit;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,8 +1,8 @@
-package com.SmartBank.service;
+package com.SmartBank.security;
 
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
-import com.SmartBank.entity.enums.ErrorCode;
+import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.exception.AppException;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;

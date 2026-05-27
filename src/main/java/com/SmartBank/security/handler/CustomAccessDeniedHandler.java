@@ -1,4 +1,4 @@
-package com.SmartBank.exception;
+package com.SmartBank.security.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,6 +1,6 @@
 package com.SmartBank.controller;
 
-import com.SmartBank.security.RateLimit;
+import com.SmartBank.security.ratelimit.RateLimit;
 
 import com.SmartBank.dto.request.DepositWithDrawRequest;
 import com.SmartBank.dto.request.TransferRequest;

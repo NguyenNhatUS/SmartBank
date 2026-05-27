@@ -1,4 +1,4 @@
-package com.SmartBank.entity.enums;
+package com.SmartBank.exception;
 
 import org.springframework.http.HttpStatus;
 

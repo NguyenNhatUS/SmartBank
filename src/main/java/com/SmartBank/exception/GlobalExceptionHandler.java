@@ -57,6 +57,6 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(),
                 LocalDateTime.now());
 
-        return ResponseEntity.status(400).body(error);
+        return ResponseEntity.status(500).body(error);
     }
 }

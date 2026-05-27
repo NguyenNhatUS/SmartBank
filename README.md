@@ -45,7 +45,6 @@ src/main/java/com/SmartBank/
 │       ├── AccountResponse.java
 │       ├── CustomerAccountResponse.java
 │       ├── CustomerResponse.java
-│       ├── ErrorResponse.java
 │       ├── LoginResponse.java
 │       └── TransactionResponse.java
 │
@@ -59,14 +58,13 @@ src/main/java/com/SmartBank/
 │       ├── AccountStatus.java
 │       ├── AccountType.java
 │       ├── CustomerStatus.java
-│       ├── ErrorCode.java
 │       ├── Role.java
 │       └── TransactionType.java
 │
 ├── exception/
 │   ├── AppException.java
-│   ├── CustomAccessDeniedHandler.java
-│   ├── CustomAuthenticationEntryPoint.java
+│   ├── ErrorCode.java
+│   ├── ErrorResponse.java
 │   └── GlobalExceptionHandler.java
 │
 ├── mapper/
@@ -82,15 +80,20 @@ src/main/java/com/SmartBank/
 │   └── TransactionRepository.java
 │
 ├── security/
+│   ├── CustomUserDetailsService.java
 │   ├── JwtAuthenticationFilter.java
 │   ├── JwtTokenProvider.java
-│   ├── RateLimit.java
-│   └── RateLimitAspect.java
+│   ├── handler/
+│   │   ├── CustomAccessDeniedHandler.java
+│   │   └── CustomAuthenticationEntryPoint.java
+│   │
+│   └── ratelimit/
+│       ├── RateLimit.java
+│       └── RateLimitAspect.java
 │
 └── service/
     ├── AccountService.java
     ├── AuthService.java
-    ├── CustomUserDetailsService.java
     ├── CustomerService.java
     └── TransactionService.java
 ```
@@ -423,9 +426,9 @@ Implemented in: [TransactionController.java](file:///d:/SmartBank_Project/SmartB
 
 ##  Global Exception Handling
 
-In case of errors, the application returns a unified JSON error payload. The specific error codes are cataloged in [ErrorCode.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/enums/ErrorCode.java).
+In case of errors, the application returns a unified JSON error payload. The specific error codes are cataloged in [ErrorCode.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/ErrorCode.java).
 
-#### Error Response Format ([ErrorResponse.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/ErrorResponse.java)):
+#### Error Response Format ([ErrorResponse.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/ErrorResponse.java)):
 ```json
 {
   "code": 1402,

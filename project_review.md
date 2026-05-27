@@ -53,39 +53,38 @@ com.SmartBank
 
 - **`config` (Configuration Package):**
   - *Trách nhiệm:* Cấu hình các Bean hệ thống, cấu hình chuỗi bộ lọc Spring Security, CORS, phân quyền, cấu hình bộ đệm Redis.
-  - *Lớp tiêu biểu:* [SecurityConfig.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/config/SecurityConfig.java) (cấu hình phân quyền endpoint), [RedisConfig.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/config/RedisConfig.java) (cấu hình bộ nhớ đệm).
+  - *Lớp tiêu biểu:* [`SecurityConfig.java`] (cấu hình phân quyền endpoint), 
+  [`RedisConfig.java`] (cấu hình bộ nhớ đệm).
 
 - **`controller` (Presentation Layer):**
   - *Trách nhiệm:* Nhận HTTP Request, xác thực dữ liệu đầu vào cơ bản (`@Valid`), điều hướng nghiệp vụ xuống tầng Service, trả về HTTP Response.
-  - *Lớp tiêu biểu:* [AccountController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AccountController.java), [TransactionController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/TransactionController.java).
+  - *Lớp tiêu biểu:* [`AccountController.java`], [`TransactionController.java`]
 
 - **`dto` (Data Transfer Objects):**
   - *Trách nhiệm:* Phân tách cấu trúc dữ liệu gửi lên và trả về của API ra khỏi cấu trúc bảng cơ sở dữ liệu (JPA Entities), bảo vệ thông tin nhạy cảm.
-  - *Lớp tiêu biểu:* [TransferRequest.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/request/TransferRequest.java), [AccountResponse.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/AccountResponse.java).
-
+  - *Lớp tiêu biểu:* [`TransferRequest.java`], [`AccountResponse.java`]
 - **`entity` (Domain Model / Persistence Layer):**
   - *Trách nhiệm:* Ánh xạ quan hệ thực thể đối tượng sang các bảng quan hệ trong DB (ORM).
-  - *Lớp tiêu biểu:* [Customer.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Customer.java), [Account.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Account.java), [Transaction.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Transaction.java).
+  - *Lớp tiêu biểu:* [`Customer.java`], [`Account.java`], [`Transaction.java`]
 
 - **`exception` (Exception Handling):**
   - *Trách nhiệm:* Bắt tất cả các Exception ném ra từ tầng dưới, chuyển đổi thành định dạng JSON chuẩn hóa gửi về Client kèm HTTP Status Code phù hợp.
-  - *Lớp tiêu biểu:* [GlobalExceptionHandler.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/GlobalExceptionHandler.java), [AppException.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/exception/AppException.java).
+  - *Lớp tiêu biểu:* [`GlobalExceptionHandler.java`], [`AppException.java`]
 
 - **`mapper` (Mapping Layer):**
   - *Trách nhiệm:* Chuyển đổi dữ liệu qua lại giữa Entity và DTO.
-  - *Lớp tiêu biểu:* [CustomerMapper.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/mapper/CustomerMapper.java), [AccountMapper.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/mapper/AccountMapper.java).
+  - *Lớp tiêu biểu:* [`CustomerMapper.java`], [`AccountMapper.java`].
 
 - **`repository` (Data Access Layer):**
   - *Trách nhiệm:* Cung cấp các thao tác CRUD và các câu lệnh truy vấn JPA/HQL tương tác trực tiếp với cơ sở dữ liệu.
-  - *Lớp tiêu biểu:* [AccountRepository.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/repository/AccountRepository.java).
+  - *Lớp tiêu biểu:* [`AccountRepository.java`]
 
 - **`security` (Security & AOP Utility Layer):**
   - *Trách nhiệm:* Xử lý các nghiệp vụ bổ trợ bao gồm xác thực Token, phân quyền động dựa trên SpEL, giới hạn tần suất API thông qua kỹ thuật lập trình khía cạnh (AOP).
-  - *Lớp tiêu biểu:* [JwtAuthenticationFilter.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/JwtAuthenticationFilter.java), [RateLimitAspect.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/RateLimitAspect.java), [AccountSecurity.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/AccountSecurity.java).
-
+  - *Lớp tiêu biểu:* [`JwtAuthenticationFilter.java`], [`RateLimitAspect.java`], [`AccountSecurity.java`].
 - **`service` (Business Logic Layer):**
   - *Trách nhiệm:* Xử lý nghiệp vụ chính, bảo vệ toàn vẹn dữ liệu trong các giao dịch, quản lý các kết nối Cache.
-  - *Lớp tiêu biểu:* [TransactionService.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/service/TransactionService.java), [AccountService.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/service/AccountService.java).
+  - *Lớp tiêu biểu:* [`TransactionService.java`], [`AccountService.java`].
 
 ---
 
@@ -160,7 +159,7 @@ classDiagram
 
 ## 4. Tech Stack & Key Libraries (Công nghệ & Thư viện Lõi)
 
-Hệ thống được phát triển trên các công nghệ Java hiện đại, cấu hình chính ghi nhận trong [pom.xml](file:///d:/SmartBank_Project/SmartBank/pom.xml):
+Hệ thống được phát triển trên các công nghệ Java hiện đại, cấu hình chính ghi nhận trong [`pom.xml`];
 
 *   **Java 21**: Cung cấp nền tảng runtime hiện đại, tối ưu hiệu năng.
 *   **Spring Boot 3.4.4**: Khung ứng dụng chính cung cấp Auto-Configuration, Dependency Injection (IoC/DI).
@@ -181,8 +180,8 @@ Codebase của dự án áp dụng thành công nhiều Design Pattern kinh đi�
 ### 1. Design Patterns áp dụng:
 *   **Dependency Injection / IoC (Inversion of Control)**: Toàn bộ cấu trúc hệ thống dựa trên nguyên lý Spring Container quản lý vòng đời và tiêm các dependencies tự động (ví dụ: tiêm `AccountRepository` vào `AccountSecurity` và `AccountService`).
 *   **Singleton Pattern**: Các Service, Controller, Mapper và Repository được định nghĩa làm các Spring Bean mặc định với phạm vi (Scope) là Singleton nhằm tiết kiệm tài nguyên hệ thống.
-*   **Builder Pattern**: Áp dụng rộng rãi trên các Entity và DTO nhờ `@Builder` của Lombok (như [Customer.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/entity/Customer.java)), giúp khởi tạo các đối tượng phức tạp một cách rõ ràng và trực quan.
-*   **Aspect Pattern (AOP)**: Tách biệt khía cạnh phụ trợ (Rate Limiting) ra khỏi Controller nghiệp vụ nhờ [RateLimitAspect.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/security/RateLimitAspect.java).
+*   **Builder Pattern**: Áp dụng rộng rãi trên các Entity và DTO nhờ `@Builder` của Lombok (như [`Customer.java`]), giúp khởi tạo các đối tượng phức tạp một cách rõ ràng và trực quan.
+*   **Aspect Pattern (AOP)**: Tách biệt khía cạnh phụ trợ (Rate Limiting) ra khỏi Controller nghiệp vụ nhờ [`RateLimitAspect.java`].
 *   **Pessimistic Locking & Lock Ordering Pattern**: Ngăn ngừa xung đột Lost Update đồng thời áp dụng sắp xếp khóa (Deadlock Avoidance) trong nghiệp vụ chuyển tiền.
 
 ### 2. Đánh giá tính tuân thủ Nguyên lý SOLID:
@@ -195,5 +194,5 @@ Codebase của dự án áp dụng thành công nhiều Design Pattern kinh đi�
     - `AccountSecurity` chỉ đảm nhiệm logic phân quyền truy cập tài khoản.
 -   **Open/Closed Principle (OCP - Mở rộng/Đóng kín):** Đạt yêu cầu. Các DTO độc lập cho phép thay đổi cấu trúc dữ liệu trả về của API mà không cần sửa đổi các thực thể Entity dưới DB. Cơ chế Aspect cho phép thêm rate limiting vào bất kỳ API mới nào chỉ bằng cách gắn thêm annotation `@RateLimit` mà không cần sửa mã nguồn logic của nó.
 -   **Liskov Substitution Principle (LSP - Thay thế Liskov):** Tuân thủ. Lớp giao diện `JpaRepository` được kế thừa trực tiếp bởi các Interface Repository cụ thể mà không phá vỡ hành vi nguyên bản của Spring Data JPA.
--   **Interface Segregation Principle (ISP - Phân tách Giao diện):** Đạt yêu cầu. Các repository interface của hệ thống (như [CustomerRepository](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/repository/CustomerRepository.java)) chỉ khai báo thêm các phương thức cần thiết cho riêng domain đó, tránh việc phình to giao diện.
--   **Dependency Inversion Principle (DIP - Đảo ngược Phụ thuộc):** Tuân thủ triệt để. Tầng Service phụ thuộc hoàn toàn vào các Interface Repository (ví dụ: `AccountRepository`), cho phép dễ dàng Mocking/Stubbing dữ liệu trong các lớp kiểm thử tự động (Unit Tests) như [CustomerServiceTest.java](file:///d:/SmartBank_Project/SmartBank/src/test/java/com/SmartBank/service/CustomerServiceTest.java).
+-   **Interface Segregation Principle (ISP - Phân tách Giao diện):** Đạt yêu cầu. Các repository interface của hệ thống (như [`CustomerRepository`]) chỉ khai báo thêm các phương thức cần thiết cho riêng domain đó, tránh việc phình to giao diện.
+-   **Dependency Inversion Principle (DIP - Đảo ngược Phụ thuộc):** Tuân thủ triệt để. Tầng Service phụ thuộc hoàn toàn vào các Interface Repository (ví dụ: `AccountRepository`), cho phép dễ dàng Mocking/Stubbing dữ liệu trong các lớp kiểm thử tự động (Unit Tests) như [`CustomerServiceTest.java`].

@@ -10,14 +10,14 @@ Dự án **SmartBank** được xây dựng dựa trên mô hình **Kiến trúc
 
 ```mermaid
 graph TD
-    Client[REST Client / Frontend] --> SecurityFilter[Security Filter Chain]
-    SecurityFilter --> RateLimiter[RateLimitAspect - AOP / Redis Lua]
-    RateLimiter --> Controllers[Tầng Controller]
-    Controllers --> Services[Tầng Service]
-    Services --> Mappers[Tầng Mapper]
-    Services --> Repositories[Tầng Repository]
-    Repositories --> Database[(MySQL Database)]
-    Services --> Cache[(Redis Cache)]
+    Client["REST Client / Frontend"] --> SecurityFilter["Security Filter Chain"]
+    SecurityFilter --> RateLimiter["RateLimitAspect - AOP / Redis Lua"]
+    RateLimiter --> Controllers["Tầng Controller"]
+    Controllers --> Services["Tầng Service"]
+    Services --> Mappers["Tầng Mapper"]
+    Services --> Repositories["Tầng Repository"]
+    Repositories --> Database[("MySQL Database")]
+    Services --> Cache[("Redis Cache")]
 ```
 
 ### Cách các thành phần tương tác:
@@ -149,7 +149,7 @@ classDiagram
     TransactionService --> TransactionMapper : maps
     AccountRepository ..> Account : manages
     TransactionRepository ..> Transaction : manages
-    Transaction --> Account : references (source & target)
+    Transaction --> Account : "references (source and target)"
 ```
 
 ### Quy trình đi của luồng dữ liệu (Data Flow Steps):

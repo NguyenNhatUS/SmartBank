@@ -96,51 +96,48 @@ Dưới đây là biểu đồ Class Diagram thể hiện cấu trúc và mối 
 ```mermaid
 classDiagram
     class TransactionController {
-        -TransactionService service
-        +deposit(DepositWithDrawRequest) ResponseEntity
-        +withdraw(DepositWithDrawRequest) ResponseEntity
-        +transfer(TransferRequest) ResponseEntity
+        -service : TransactionService
+        +deposit(request : DepositWithDrawRequest) : ResponseEntity
+        +withdraw(request : DepositWithDrawRequest) : ResponseEntity
+        +transfer(request : TransferRequest) : ResponseEntity
     }
 
     class TransactionService {
-        -TransactionRepository transactionRepository
-        -AccountRepository accountRepository
-        -TransactionMapper mapper
-        +deposit(DepositWithDrawRequest) TransactionResponse
-        +withdraw(DepositWithDrawRequest) TransactionResponse
-        +transfer(TransferRequest) TransactionResponse
+        -transactionRepository : TransactionRepository
+        -accountRepository : AccountRepository
+        -mapper : TransactionMapper
+        +deposit(request : DepositWithDrawRequest) : TransactionResponse
+        +withdraw(request : DepositWithDrawRequest) : TransactionResponse
+        +transfer(request : TransferRequest) : TransactionResponse
     }
 
     class AccountRepository {
-        <<interface>>
-        +existsByAccountNumber(String) boolean
-        +findByAccountNumber(String) Account
-        +findByAccountNumberWithLock(String) Account
+        +existsByAccountNumber(accountNumber : String) : boolean
+        +findByAccountNumber(accountNumber : String) : Account
+        +findByAccountNumberWithLock(accountNumber : String) : Account
     }
 
-    class TransactionRepository {
-        <<interface>>
-    }
+    class TransactionRepository
 
     class TransactionMapper {
-        +toResponse(Transaction) TransactionResponse
+        +toResponse(transaction : Transaction) : TransactionResponse
     }
 
     class Account {
-        -Long id
-        -String accountNumber
-        -BigDecimal balance
-        -AccountStatus status
-        -Customer customer
+        -id : Long
+        -accountNumber : String
+        -balance : BigDecimal
+        -status : AccountStatus
+        -customer : Customer
     }
 
     class Transaction {
-        -Long id
-        -String transactionCode
-        -TransactionType type
-        -BigDecimal amount
-        -Account sourceAccount
-        -Account targetAccount
+        -id : Long
+        -transactionCode : String
+        -type : TransactionType
+        -amount : BigDecimal
+        -sourceAccount : Account
+        -targetAccount : Account
     }
 
     TransactionController --> TransactionService : calls
@@ -149,7 +146,7 @@ classDiagram
     TransactionService --> TransactionMapper : maps
     AccountRepository ..> Account : manages
     TransactionRepository ..> Transaction : manages
-    Transaction --> Account : "references (source and target)"
+    Transaction --> Account : references
 ```
 
 ### Quy trình đi của luồng dữ liệu (Data Flow Steps):

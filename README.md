@@ -19,8 +19,75 @@ The system supports core banking operations such as customer profile management,
 | **JJWT (Java JWT)** | 0.12.6 | Library used to sign, parse, and validate JSON Web Tokens. |
 | **MySQL** | 8.0 | Relational database to persist accounts, transactions, and customers. |
 | **Redis** | 7.2 | In-memory key-value store used for caching and rate limiting. |
+| **MapStruct** | 1.6.3 | Compile-time code generator for type-safe DTO <=> Entity mapping. |
 | **Lombok** | — | Annotation processor to eliminate boilerplate Java code. |
 | **Docker / Compose** | — | Containerization for easy local deployment. |
+
+### Entity Relationship Diagram (ERD)
+
+The relational schema is designed with strict integrity constraints, composite indexes for high-throughput query performance, and clear entity boundaries:
+
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ ACCOUNTS : "owns (1:N)"
+    ACCOUNTS ||--o{ TRANSACTIONS : "as source_account (1:N)"
+    ACCOUNTS |o--o{ TRANSACTIONS : "as target_account (0..1:N)"
+
+    CUSTOMERS ||--o{ REFRESH_TOKENS : "identifies (via username)"
+    EMPLOYEES ||--o{ REFRESH_TOKENS : "identifies (via username)"
+
+    CUSTOMERS {
+        bigint id PK "auto-increment"
+        varchar_100 full_name "Customer full name"
+        varchar_100 email UK "Unique email"
+        varchar_12 phone UK "Unique phone number"
+        varchar_255 address "Customer address"
+        date date_of_birth "Date of birth"
+        varchar_20 status "ACTIVE | LOCKED"
+        varchar_255 username UK "Unique username"
+        varchar_255 password "BCrypt hashed"
+        boolean enabled "Account enabled flag"
+        datetime created_at "Registration timestamp"
+    }
+
+    ACCOUNTS {
+        bigint id PK "auto-increment"
+        bigint customer_id FK "Owner customer reference"
+        varchar_25 account_number UK "10-digit account number"
+        varchar_20 type "CHECKING | SAVINGS"
+        decimal_18_2 balance "Account balance (>= 0)"
+        varchar_25 status "ACTIVE | CLOSED | FROZEN"
+        datetime created_at "Account creation timestamp"
+    }
+
+    TRANSACTIONS {
+        bigint id PK "auto-increment"
+        varchar_25 transaction_code UK "Unique txn code (TXN...)"
+        varchar_25 type "DEPOSIT | WITHDRAW | TRANSFER"
+        decimal_18_2 amount "Transaction amount"
+        varchar_255 description "Transfer notes or memo"
+        datetime created_at "Transaction timestamp"
+        bigint source_account FK "Source account reference"
+        bigint target_account FK "Target account (null for deposit/withdraw)"
+    }
+
+    EMPLOYEES {
+        bigint id PK "auto-increment"
+        varchar_255 username UK "Unique staff username"
+        varchar_255 password "BCrypt hashed"
+        varchar_20 role "EMPLOYEE | ADMIN"
+        boolean enabled "Staff enabled flag"
+    }
+
+    REFRESH_TOKENS {
+        bigint id PK "auto-increment"
+        varchar_255 token UK "JWT refresh token UUID"
+        varchar_255 username "User identifier"
+        varchar_255 role "Role (CUSTOMER / STAFF)"
+        datetime expires_at "Expiration timestamp"
+        boolean revoked "Revocation status"
+    }
+```
 
 ### Architectural Highlights & Design Patterns
 
@@ -67,7 +134,7 @@ src/main/java/com/SmartBank/
 ├── entity/                  # JPA Entities (Database Models)
 │   └── enums/               # Enums like Role, TransactionType, AccountStatus
 ├── exception/               # Centralized Global Exception Handler & Custom Errors
-├── mapper/                  # Manual DTO-Entity mappings
+├── mapper/                  # MapStruct DTO-Entity mappings
 ├── repository/              # Spring Data JPA Repository interfaces
 ├── security/                # Security filters, Custom EntryPoints, and AOP Rate Limiting
 │   ├── ratelimit/

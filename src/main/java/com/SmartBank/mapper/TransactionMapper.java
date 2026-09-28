@@ -2,29 +2,13 @@ package com.SmartBank.mapper;
 
 import com.SmartBank.dto.response.TransactionResponse;
 import com.SmartBank.entity.Transaction;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class TransactionMapper {
-    public TransactionResponse toResponse(Transaction transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.getId())
-                .transactionCode(transaction.getTransactionCode())
-                .type(String.valueOf(transaction.getType()))
-                .amount(transaction.getAmount())
-                .description(transaction.getDescription())
-                .createdAt(transaction.getCreatedAt())
-                .sourceAccountNumber(transaction.getSourceAccount().getAccountNumber())
-                .targetAccountNumber(
-                        (transaction.getTargetAccount() != null)
-                                ? transaction.getTargetAccount().getAccountNumber()
-                                : null
-                )
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface TransactionMapper {
 
-
-
-
-
+    @Mapping(source = "sourceAccount.accountNumber", target = "sourceAccountNumber")
+    @Mapping(source = "targetAccount.accountNumber", target = "targetAccountNumber")
+    TransactionResponse toResponse(Transaction transaction);
 }

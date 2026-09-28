@@ -4,28 +4,22 @@ import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class AccountMapper {
-    public AccountResponse toResponse(Account account) {
-        return AccountResponse.builder()
-                .id(account.getId())
-                .accountNumber(account.getAccountNumber())
-                .type(String.valueOf(account.getType()))
-                .balance(account.getBalance())
-                .status(String.valueOf(account.getStatus()))
-                .createdAt(account.getCreatedAt())
-                .customerId(account.getCustomer().getId())
-                .customerName(account.getCustomer().getFullName())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface AccountMapper {
 
-    public Account toEntity(AccountCreateRequest request, Customer customer) {
-        return Account.builder()
-                .customer(customer)
-                .type(request.getType())
-                .build();
-    }
+    @Mapping(source = "customer.id", target = "customerId")
+    @Mapping(source = "customer.fullName", target = "customerName")
+    AccountResponse toResponse(Account account);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "accountNumber", ignore = true)
+    @Mapping(target = "balance", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(source = "customer", target = "customer")
+    @Mapping(source = "request.type", target = "type")
+    Account toEntity(AccountCreateRequest request, Customer customer);
 }

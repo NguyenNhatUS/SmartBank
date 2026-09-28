@@ -10,6 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "Employees", indexes = {
+        @Index(name = "idx_employee_role_enabled", columnList = "role, enabled")
+})
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

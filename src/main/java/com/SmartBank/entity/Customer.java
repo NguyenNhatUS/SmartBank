@@ -11,7 +11,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "Customers")
+@Table(name = "Customers", indexes = {
+        @Index(name = "idx_customer_full_name", columnList = "full_name"),
+        @Index(name = "idx_customer_status", columnList = "status"),
+        @Index(name = "idx_customer_created_at", columnList = "created_at")
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,7 +26,7 @@ public class Customer {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "full_name", length = 1000)
+    @Column(name = "full_name", length = 100)
     private String fullName;
 
     @Column(unique = true, length = 100)

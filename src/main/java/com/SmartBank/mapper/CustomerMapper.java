@@ -3,33 +3,20 @@ package com.SmartBank.mapper;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.CustomerResponse;
 import com.SmartBank.entity.Customer;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class CustomerMapper {
-    public Customer toEntity(CustomerRequest request) {
-        return Customer.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .dateOfBirth(request.getDateOfBirth())
-                .username(request.getUsername())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface CustomerMapper {
 
-    public CustomerResponse toResponse(Customer customer) {
-        return CustomerResponse.builder()
-                .id(customer.getId())
-                .fullName(customer.getFullName())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .address(customer.getAddress())
-                .dateOfBirth(customer.getDateOfBirth())
-                .status(String.valueOf(customer.getStatus()))
-                .createdAt(customer.getCreatedAt())
-                .totalAccounts(customer.getAccountList() == null ? 0 : customer.getAccountList().size())
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "accountList", ignore = true)
+    Customer toEntity(CustomerRequest request);
 
+    @Mapping(target = "totalAccounts", expression = "java(customer.getAccountList() == null ? 0 : customer.getAccountList().size())")
+    CustomerResponse toResponse(Customer customer);
 }

@@ -13,6 +13,7 @@ import lombok.*;
 @Table(name = "Employees", indexes = {
         @Index(name = "idx_employee_role_enabled", columnList = "role, enabled")
 })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

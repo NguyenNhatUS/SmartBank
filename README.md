@@ -124,7 +124,7 @@ Authentication is completely stateless using JSON Web Tokens:
 
 ## 📁 Project Directory Layout
 
-```text
+```text 
 src/main/java/com/SmartBank/
 ├── config/                  # App configurations (SecurityConfig, RedisConfig)
 ├── controller/              # REST Endpoints (Presentation layer)

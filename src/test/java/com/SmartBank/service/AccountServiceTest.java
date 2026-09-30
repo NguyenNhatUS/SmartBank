@@ -11,6 +11,7 @@ import com.SmartBank.entity.enums.AccountType;
 import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.exception.AppException;
+import com.SmartBank.service.impl.AccountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +45,7 @@ class AccountServiceTest {
     private AccountMapper mapper;
 
     @InjectMocks
-    private AccountService service;
+    private AccountServiceImpl service;
 
     @BeforeEach
     void setUp() {

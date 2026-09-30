@@ -21,4 +21,13 @@ public class AccountSecurity {
                 .map(account -> account.getCustomer() != null && username.equals(account.getCustomer().getUsername()))
                 .orElse(false);
     }
+
+    @Transactional(readOnly = true)
+    public boolean isOwnerByAccountNumber(String accountNumber, String username) {
+        if (accountNumber == null || username == null) {
+            return false;
+        }
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        return account != null && account.getCustomer() != null && username.equals(account.getCustomer().getUsername());
+    }
 }

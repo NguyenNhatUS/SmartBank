@@ -6,6 +6,7 @@ import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.service.impl.CustomerServiceImpl;
 import com.SmartBank.exception.AppException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class CustomerServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private CustomerService service;
+    private CustomerServiceImpl service;
 
     private CustomerRequest request;
     private Customer customer;

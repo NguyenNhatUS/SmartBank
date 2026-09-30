@@ -1,0 +1,163 @@
+package com.SmartBank.service.impl;
+
+import com.SmartBank.dto.request.CreateEmployeeRequest;
+import com.SmartBank.dto.request.LoginRequest;
+import com.SmartBank.dto.request.RefreshRequest;
+import com.SmartBank.dto.request.RegisterRequest;
+import com.SmartBank.dto.response.LoginResponse;
+import com.SmartBank.entity.Customer;
+import com.SmartBank.entity.Employee;
+import com.SmartBank.entity.RefreshToken;
+import com.SmartBank.entity.enums.Role;
+import com.SmartBank.exception.AppException;
+import com.SmartBank.exception.ErrorCode;
+import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.repository.EmployeeRepository;
+import com.SmartBank.repository.RefreshTokenRepository;
+import com.SmartBank.security.JwtTokenProvider;
+import com.SmartBank.service.AuthService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+
+    private final EmployeeRepository employeeRepository;
+    private final CustomerRepository customerRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtUtil;
+
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        String username = request.getUsername();
+        String rawPassword = request.getPassword();
+        String role;
+        String encodedPassword;
+
+        Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
+        if (employeeOpt.isPresent()) {
+            encodedPassword = employeeOpt.get().getPassword();
+            role = employeeOpt.get().getRole().name();
+        } else {
+            Customer customer = customerRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
+            encodedPassword = customer.getPassword();
+            role = "CUSTOMER";
+        }
+
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+        }
+
+        String accessToken = jwtUtil.generateToken(username, role);
+        String refreshToken = createRefreshToken(username, role);
+
+        return LoginResponse
+                .builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .username(username)
+                .role(role)
+                .build();
+    }
+
+    @Override
+    public LoginResponse refresh(RefreshRequest request) {
+        RefreshToken stored = refreshTokenRepository.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+
+        if (stored.isRevoked()) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_REVOKED);
+        }
+
+        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(stored);
+            throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        // Revoke token cũ, cấp token mới (rotation)
+        stored.setRevoked(true);
+        refreshTokenRepository.save(stored);
+
+        String newAccessToken = jwtUtil.generateToken(stored.getUsername(), stored.getRole());
+        String newRefreshToken = createRefreshToken(stored.getUsername(), stored.getRole());
+
+        return LoginResponse
+                .builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .username(stored.getUsername())
+                .role(stored.getRole())
+                .build();
+    }
+
+    @Override
+    public void logout(String username) {
+        refreshTokenRepository.deleteByUsername(username);
+    }
+
+    @Override
+    public void register(RegisterRequest request) {
+        boolean existsInEmployee = employeeRepository.findByUsername(request.getUsername()).isPresent();
+        boolean existsInCustomer = customerRepository.findByUsername(request.getUsername()).isPresent();
+
+        if (existsInEmployee || existsInCustomer) {
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+
+        Customer customer = Customer
+                .builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .enabled(true)
+                .build();
+
+        customerRepository.save(customer);
+    }
+
+    private String createRefreshToken(String username, String role) {
+        RefreshToken refreshToken = RefreshToken
+                .builder()
+                .token(jwtUtil.generateRefreshToken())
+                .username(username)
+                .role(role)
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000))
+                .revoked(false)
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+        return refreshToken.getToken();
+    }
+
+    @Override
+    public void createEmployee(CreateEmployeeRequest request) {
+        if (request.getRole() == Role.CUSTOMER) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+
+        if (employeeRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new AppException(ErrorCode.EMPLOYEE_ALREADY_EXISTS);
+        }
+
+        Employee employee = Employee
+                .builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole())
+                .enabled(true)
+                .build();
+
+        employeeRepository.save(employee);
+    }
+}

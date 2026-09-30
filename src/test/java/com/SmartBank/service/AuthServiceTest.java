@@ -25,6 +25,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.SmartBank.service.impl.AuthServiceImpl;
+
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -35,7 +37,7 @@ class AuthServiceTest {
     @Mock private JwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
     @Test
     void login_shouldReturnTokens_whenEmployeeCredentialsValid() {

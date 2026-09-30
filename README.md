@@ -128,18 +128,20 @@ Authentication is completely stateless using JSON Web Tokens:
 src/main/java/com/SmartBank/
 ├── config/                  # App configurations (SecurityConfig, RedisConfig)
 ├── controller/              # REST Endpoints (Presentation layer)
+│   └── v1/                  # API Version 1 Controllers (Account, Auth, Customer, Transaction)
 ├── dto/                     # Request and Response Data Transfer Objects
-│   ├── request/
-│   └── response/
-├── entity/                  # JPA Entities (Database Models)
+│   ├── request/             # Incoming request DTOs with validation rules (@Valid)
+│   └── response/            # Unified ApiResponse<T>, PageResponse<T>, and Domain DTOs
+├── entity/                  # JPA Entities (Database Models with composite indexes)
 │   └── enums/               # Enums like Role, TransactionType, AccountStatus
-├── exception/               # Centralized Global Exception Handler & Custom Errors
-├── mapper/                  # MapStruct DTO-Entity mappings
-├── repository/              # Spring Data JPA Repository interfaces
-├── security/                # Security filters, Custom EntryPoints, and AOP Rate Limiting
-│   ├── ratelimit/
-│   └── handler/
-└── service/                 # Core Business Logic implementation (Transactional)
+├── exception/               # Centralized Global Exception Handler (@RestControllerAdvice) & AppException
+├── mapper/                  # MapStruct compile-time DTO <=> Entity mappers
+├── repository/              # Spring Data JPA Repository interfaces (with Lock & Pagination)
+├── security/                # JWT filters, Custom EntryPoints, and AOP Rate Limiting
+│   ├── ratelimit/           # Custom @RateLimit annotation & Redis Lua script aspect
+│   └── handler/             # Custom AuthenticationEntryPoint (401) & AccessDeniedHandler (403)
+└── service/                 # Core Business Service Interfaces (Dependency Inversion)
+    └── impl/                # Service Implementations (Transactional & Redis Caching)
 ```
 
 ---
@@ -246,7 +248,7 @@ Authorization: Bearer <your_access_token>
 ## 📖 Core API Endpoints
 
 ### 1. Authentication Endpoints
-*Controller code:* [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AuthController.java)
+*Controller code:* [AuthController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/AuthController.java)
 
 #### Customer Self-Registration
 *   **Endpoint**: `POST /auth/register`
@@ -319,7 +321,7 @@ Authorization: Bearer <your_access_token>
 ---
 
 ### 2. Administrator & Employee Management Endpoints
-*Controller code:* [AuthController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AuthController.java)
+*Controller code:* [AuthController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/AuthController.java)
 
 #### Create System Employee/Admin
 *   **Endpoint**: `POST /admin/employees`
@@ -338,7 +340,7 @@ Authorization: Bearer <your_access_token>
 ---
 
 ### 3. Customer Profile Management Endpoints
-*Controller code:* [CustomerController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/CustomerController.java)
+*Controller code:* [CustomerController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/CustomerController.java)
 
 > **Note**: These endpoints are utilized by administrators to manage customer profile details.
 
@@ -406,7 +408,7 @@ Authorization: Bearer <your_access_token>
 ---
 
 ### 4. Account Management Endpoints
-*Controller code:* [AccountController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/AccountController.java)
+*Controller code:* [AccountController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/AccountController.java)
 
 #### Create a Personal Bank Account
 *   **Endpoint**: `POST /api/v1/accounts/my`
@@ -472,7 +474,7 @@ Authorization: Bearer <your_access_token>
 ---
 
 ### 5. Transaction Endpoints
-*Controller code:* [TransactionController.java](file:///d:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/TransactionController.java)
+*Controller code:* [TransactionController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/TransactionController.java)
 
 #### Deposit Funds
 *   **Endpoint**: `POST /api/v1/transactions/deposit`
@@ -548,6 +550,40 @@ Authorization: Bearer <your_access_token>
       "createdAt": "2026-05-21T15:15:00",
       "sourceAccountNumber": "1537284903",
       "targetAccountNumber": "9876543210"
+    }
+    ```
+
+#### Get Account Bank Statement (Paginated & Sorted)
+*   **Endpoint**: `GET /api/v1/transactions/account/{accountNumber}?page=0&size=10`
+*   **Access**: `EMPLOYEE`, `ADMIN`, or account owner (`CUSTOMER`) via `@accountSecurity.isOwnerByAccountNumber`
+*   **Query Parameters**:
+    *   `page`: Zero-based page index (default: `0`)
+    *   `size`: Number of transaction records per page (default: `10`)
+*   **Response Payload** ([ApiResponse.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/ApiResponse.java) wrapping [PageResponse.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/dto/response/PageResponse.java)):
+    ```json
+    {
+      "code": 200,
+      "message": "Get account statement successfully",
+      "data": {
+        "content": [
+          {
+            "id": 103,
+            "transactionCode": "TXN1716283969234",
+            "type": "TRANSFER",
+            "amount": 100000,
+            "description": "Fund transfer for lunch payment",
+            "createdAt": "2026-05-21T15:15:00",
+            "sourceAccountNumber": "1537284903",
+            "targetAccountNumber": "9876543210"
+          }
+        ],
+        "pageNo": 0,
+        "pageSize": 10,
+        "totalElements": 1,
+        "totalPages": 1,
+        "last": true
+      },
+      "timestamp": "2026-05-21T15:16:00"
     }
     ```
 

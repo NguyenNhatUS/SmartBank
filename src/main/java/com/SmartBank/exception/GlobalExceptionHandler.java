@@ -32,18 +32,19 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        String message = ex.getBindingResult().getFieldErrors()
+        String message = ex.getBindingResult()
+                .getFieldErrors()
                 .stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-        ErrorResponse error = new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 400,
                 message,
                 request.getRequestURI(),
                 LocalDateTime.now());
 
-        return ResponseEntity.status(400).body(error);
+        return ResponseEntity.status(400).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -51,12 +52,12 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        ErrorResponse error = new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 500,
                 "System Error, try later",
                 request.getRequestURI(),
                 LocalDateTime.now());
 
-        return ResponseEntity.status(500).body(error);
+        return ResponseEntity.status(500).body(errorResponse);
     }
 }

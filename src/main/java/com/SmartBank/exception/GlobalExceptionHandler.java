@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorResponse> handleWebException(
+    public ResponseEntity<ErrorResponse> handleAppException(
             AppException ex,
             HttpServletRequest request
     ) {

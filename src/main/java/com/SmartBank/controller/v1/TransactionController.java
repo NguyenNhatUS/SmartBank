@@ -47,7 +47,7 @@ public class TransactionController {
     }
 
     @GetMapping("/account/{accountNumber}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwnerByAccountNumber(#accountNumber, principal.username)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwnerByAccountNumber(#accountNumber, authentication.name)")
     public ResponseEntity<ApiResponse<PageResponse<TransactionResponse>>> getAccountStatement(
             @PathVariable String accountNumber,
             @RequestParam(defaultValue = "0") int page,

@@ -14,8 +14,6 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     boolean existsByAccountNumber(String accountNumber);
 
-    List<Account> findAllByOrderByCustomerIdAsc();
-
     Account findByAccountNumber(String accountNumber);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -28,9 +27,9 @@ public class AccountController {
                 .body(ApiResponse.created("Account created successfully", response));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @accountSecurity.isOwner(#id, principal.username)")
+    @PreAuthorize("hasRole('ADMIN') or @accountSecurity.isOwner(#id, authentication.name)")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AccountResponse>> getById(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<ApiResponse<AccountResponse>> getById(@PathVariable Long id) {
         AccountResponse response = service.getByID(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }

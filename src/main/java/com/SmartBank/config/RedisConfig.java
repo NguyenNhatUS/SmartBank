@@ -18,7 +18,7 @@ public class RedisConfig {
 
         @Bean
         public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-                // TTL mặc định
+                // Default TTL
                 RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                                 .entryTtl(Duration.ofMinutes(10))
                                 .disableCachingNullValues()
@@ -26,13 +26,13 @@ public class RedisConfig {
                                                 RedisSerializationContext.SerializationPair
                                                                 .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-                // TTL riêng cho từng cache
+                // TTL for each Cache
                 Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
 
                 cacheConfigs.put("accounts",
                                 defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
-                // Thông tin khách hàng — ít thay đổi → TTL dài hơn
+                // Customer info - less change -> TTL live longer
                 cacheConfigs.put("customers",
                                 defaultConfig.entryTtl(Duration.ofMinutes(30)));
 

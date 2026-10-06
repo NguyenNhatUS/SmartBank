@@ -50,8 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/employees")
-    public ResponseEntity<ApiResponse<Void>> createEmployee(@RequestBody CreateEmployeeRequest request,
-            Authentication authentication) {
+    public ResponseEntity<ApiResponse<Void>> createEmployee(@RequestBody CreateEmployeeRequest request) {
         authService.createEmployee(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

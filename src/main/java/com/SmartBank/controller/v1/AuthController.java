@@ -21,7 +21,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/register")
-    // @RateLimit(requests = 3, duration = 60)
+    @RateLimit(requests = 3, duration = 60)
     public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity

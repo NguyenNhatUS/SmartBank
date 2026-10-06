@@ -8,6 +8,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,9 +52,15 @@ public class RedisConfig {
                         RedisConnectionFactory connectionFactory) {
                 org.springframework.data.redis.core.RedisTemplate<String, Object> template = new org.springframework.data.redis.core.RedisTemplate<>();
                 template.setConnectionFactory(connectionFactory);
-                template.setKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
+                template.setKeySerializer(new StringRedisSerializer());
                 template.setValueSerializer(
-                                new org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer());
+                                new GenericJackson2JsonRedisSerializer());
                 return template;
+        }
+
+        @Bean("rateLimitRedisTemplate")
+        public org.springframework.data.redis.core.StringRedisTemplate rateLimitRedisTemplate(
+                        RedisConnectionFactory connectionFactory) {
+                return new org.springframework.data.redis.core.StringRedisTemplate(connectionFactory);
         }
 }

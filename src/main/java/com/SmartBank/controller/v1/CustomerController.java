@@ -5,6 +5,7 @@ import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.ApiResponse;
 import com.SmartBank.dto.response.CustomerResponse;
 import com.SmartBank.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class CustomerController {
     }
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<CustomerResponse>> create(@RequestBody CustomerRequest request) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> create(@Valid @RequestBody CustomerRequest request) {
         CustomerResponse response = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Customer created successfully", response));
@@ -41,7 +42,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CustomerResponse>> update(@PathVariable Long id, @RequestBody CustomerRequest request) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> update(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
         CustomerResponse response = service.update(id, request);
         return ResponseEntity.ok(ApiResponse.success("Customer updated successfully", response));
     }

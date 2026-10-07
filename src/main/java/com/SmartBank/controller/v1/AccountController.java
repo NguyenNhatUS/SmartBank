@@ -1,10 +1,12 @@
 package com.SmartBank.controller.v1;
 
 import com.SmartBank.dto.request.AccountCreateRequest;
+import com.SmartBank.dto.request.CustomerAccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.ApiResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
 import com.SmartBank.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,7 @@ public class AccountController {
     private final AccountService service;
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(@RequestBody AccountCreateRequest request) {
+    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(@Valid @RequestBody AccountCreateRequest request) {
         AccountResponse response = service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Account created successfully", response));
@@ -52,15 +54,17 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/my")
     public ResponseEntity<ApiResponse<AccountResponse>> createMyAccount(
-            @RequestBody AccountCreateRequest request,
+            @Valid @RequestBody CustomerAccountCreateRequest request,
             Authentication authentication) {
         AccountResponse response = service.createAccountForCustomer(authentication.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created("Customer account created successfully", response));
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<AccountResponse>>> getMyAccounts(Authentication authentication) {
         List<AccountResponse> response = service.getAccountsByUsername(authentication.getName());

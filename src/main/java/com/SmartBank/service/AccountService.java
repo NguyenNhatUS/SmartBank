@@ -1,6 +1,7 @@
 package com.SmartBank.service;
 
 import com.SmartBank.dto.request.AccountCreateRequest;
+import com.SmartBank.dto.request.CustomerAccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
 
@@ -20,5 +21,5 @@ public interface AccountService {
 
     List<AccountResponse> getAccountsByUsername(String username);
 
-    AccountResponse createAccountForCustomer(String username, AccountCreateRequest request);
+    AccountResponse createAccountForCustomer(String username, CustomerAccountCreateRequest request);
 }

@@ -15,6 +15,7 @@ import com.SmartBank.repository.AccountRepository;
 import com.SmartBank.repository.TransactionRepository;
 import com.SmartBank.service.TransactionService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,26 +23,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 
+
 @Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final TransactionMapper mapper;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, AccountRepository accountRepository,
-                                  TransactionMapper mapper) {
-        this.transactionRepository = transactionRepository;
-        this.accountRepository = accountRepository;
-        this.mapper = mapper;
-    }
-
     @Override
     @Transactional
-    @CacheEvict(value = { "accounts", "accounts_customers", "customers" }, allEntries = true)
+    @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
     public TransactionResponse deposit(@Valid DepositWithDrawRequest request) {
         if (request.getAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -77,7 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = { "accounts", "accounts_customers", "customers" }, allEntries = true)
+    @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
     public TransactionResponse withdraw(@Valid DepositWithDrawRequest request) {
         if (request.getAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -113,7 +108,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    @CacheEvict(value = { "accounts", "accounts_customers", "customers" }, allEntries = true)
+    @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
     public TransactionResponse transfer(@Valid TransferRequest request) {
         if (request.getSourceAccountNumber() == null || request.getTargetAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);

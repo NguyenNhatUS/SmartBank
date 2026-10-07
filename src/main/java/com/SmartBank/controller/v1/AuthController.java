@@ -8,6 +8,7 @@ import com.SmartBank.dto.response.ApiResponse;
 import com.SmartBank.dto.response.LoginResponse;
 import com.SmartBank.security.ratelimit.RateLimit;
 import com.SmartBank.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     @RateLimit(requests = 3, duration = 60)
-    public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -31,13 +32,13 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     @RateLimit(requests = 5, duration = 60)
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<ApiResponse<LoginResponse>> refresh(@RequestBody RefreshRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
         LoginResponse response = authService.refresh(request);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }
@@ -50,7 +51,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/employees")
-    public ResponseEntity<ApiResponse<Void>> createEmployee(@RequestBody CreateEmployeeRequest request) {
+    public ResponseEntity<ApiResponse<Void>> createEmployee(@Valid @RequestBody CreateEmployeeRequest request) {
         authService.createEmployee(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

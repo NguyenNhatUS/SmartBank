@@ -13,8 +13,7 @@ import java.util.List;
 @Setter
 @Table(name = "Customers", indexes = {
         @Index(name = "idx_customer_full_name", columnList = "full_name"),
-        @Index(name = "idx_customer_status", columnList = "status"),
-        @Index(name = "idx_customer_created_at", columnList = "created_at")
+        @Index(name = "idx_customer_status_created_at", columnList = "status, created_at")
 })
 @AllArgsConstructor
 @NoArgsConstructor

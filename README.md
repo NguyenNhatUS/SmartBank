@@ -157,7 +157,7 @@ Make sure you have the following installed on your machine:
 ### Step 1: Clone and Navigate
 Clone the repository to your local machine:
 ```bash
-git clone <repository_url>
+git clone https://github.com/NguyenNhatUS/SmartBank.git
 cd SmartBank
 ```
 

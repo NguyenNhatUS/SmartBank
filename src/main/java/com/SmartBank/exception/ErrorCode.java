@@ -24,6 +24,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_FOUND(1107, "Refresh token not found", HttpStatus.NOT_FOUND),
     REFRESH_TOKEN_REVOKED(1108, "Refresh token has been revoked", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_EXPIRED(1109, "Refresh token has expired", HttpStatus.UNAUTHORIZED),
+    AUTH_SERVICE_UNAVAILABLE(1110, "Authentication service temporarily unavailable", HttpStatus.SERVICE_UNAVAILABLE),
 
     // ========== CUSTOMER ==========
     CUSTOMER_NOT_FOUND(1200, "Customer not found", HttpStatus.NOT_FOUND),

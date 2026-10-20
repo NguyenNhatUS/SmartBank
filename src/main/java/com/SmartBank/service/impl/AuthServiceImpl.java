@@ -16,6 +16,8 @@ import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
 import com.SmartBank.service.AuthService;
+import com.SmartBank.service.TokenBlacklistService;
+import org.springframework.dao.DataAccessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
@@ -102,7 +105,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String username) {
+    public void logout(String username, String accessToken) {
+        try {
+            tokenBlacklistService.blacklist(accessToken, jwtUtil.extractExpiration(accessToken));
+        } catch (DataAccessException e) {
+            throw new AppException(ErrorCode.AUTH_SERVICE_UNAVAILABLE);
+        }
         refreshTokenRepository.deleteByUsername(username);
     }
 

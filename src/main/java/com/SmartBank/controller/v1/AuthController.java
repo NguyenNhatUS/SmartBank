@@ -44,8 +44,10 @@ public class AuthController {
     }
 
     @PostMapping("/api/auth/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(Authentication authentication) {
-        authService.logout(authentication.getName());
+    public ResponseEntity<ApiResponse<Void>> logout(
+            Authentication authentication,
+            @RequestHeader("Authorization") String authorization) {
+        authService.logout(authentication.getName(), authorization.substring(7));
         return ResponseEntity
                 .ok(ApiResponse.success("Logout successful", null));
     }

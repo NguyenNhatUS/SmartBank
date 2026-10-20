@@ -311,6 +311,10 @@ Authorization: Bearer <your_access_token>
 #### Logout
 *   **Endpoint**: `POST /api/auth/logout`
 *   **Access**: Authenticated users
+*   **Header**: `Authorization: Bearer <access_token>` (no request body).
+*   **Behavior**: Blacklists the presented access token in Redis and deletes all refresh tokens for the authenticated username. Redis stores only the token's SHA-256 hash under `token_blacklist:`, with a TTL matching the token's remaining lifetime. Subsequent requests using that token receive `401 Unauthorized`.
+*   Other access tokens for the same user remain valid until expiry; this endpoint does not revoke all access-token sessions. Newly issued JWTs include a unique `jti`.
+*   If Redis cannot be accessed, bearer-authenticated requests and logout fail with `503 Service Unavailable` rather than skipping the blacklist check. Redis blacklist storage and MySQL refresh-token deletion are separate operations, not a distributed transaction.
 *   **Response Payload**:
     ```json
     {

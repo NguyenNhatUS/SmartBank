@@ -1,6 +1,7 @@
 package com.SmartBank.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.UUID;
+import java.time.Instant;
 
 @Component
 public class JwtTokenProvider {
@@ -28,6 +30,7 @@ public class JwtTokenProvider {
     // Generate access token tu username va role
     public String generateToken(String username, String role) {
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(username)
                 .claim("role", role)
                 .issuedAt(new Date())
@@ -53,6 +56,15 @@ public class JwtTokenProvider {
     // Extract role tu token
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
+    }
+
+    public Instant extractExpiration(String token) {
+        try {
+            return extractAllClaims(token).getExpiration().toInstant();
+        } catch (ExpiredJwtException e) {
+            // A token can expire between authentication and logout.
+            return e.getClaims().getExpiration().toInstant();
+        }
     }
 
     // Kiem tra token con han khong

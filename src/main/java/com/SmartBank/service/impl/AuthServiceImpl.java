@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final CustomerRepository customerRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${jwt.refresh-expiration}")
@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        String accessToken = jwtUtil.generateToken(username, role);
+        String accessToken = jwtTokenProvider.generateToken(username, role);
         String refreshToken = createRefreshToken(username, role);
 
         return LoginResponse
@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
         stored.setRevoked(true);
         refreshTokenRepository.save(stored);
 
-        String newAccessToken = jwtUtil.generateToken(stored.getUsername(), stored.getRole());
+        String newAccessToken = jwtTokenProvider.generateToken(stored.getUsername(), stored.getRole());
         String newRefreshToken = createRefreshToken(stored.getUsername(), stored.getRole());
 
         return LoginResponse
@@ -107,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String username, String accessToken) {
         try {
-            tokenBlacklistService.blacklist(accessToken, jwtUtil.extractExpiration(accessToken));
+            tokenBlacklistService.blacklist(accessToken, jwtTokenProvider.extractExpiration(accessToken));
         } catch (DataAccessException e) {
             throw new AppException(ErrorCode.AUTH_SERVICE_UNAVAILABLE);
         }
@@ -137,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
     private String createRefreshToken(String username, String role) {
         RefreshToken refreshToken = RefreshToken
                 .builder()
-                .token(jwtUtil.generateRefreshToken())
+                .token(jwtTokenProvider.generateRefreshToken())
                 .username(username)
                 .role(role)
                 .expiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000))

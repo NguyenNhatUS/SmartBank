@@ -7,6 +7,7 @@ import com.SmartBank.dto.response.LoginResponse;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
 import com.SmartBank.entity.RefreshToken;
+import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.entity.enums.Role;
 import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.exception.AppException;
@@ -16,6 +17,9 @@ import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,16 +43,15 @@ class AuthServiceTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    @Test
-    void login_shouldReturnTokens_whenEmployeeCredentialsValid() {
-        Employee employee = new Employee();
-        employee.setUsername("admin");
-        employee.setPassword("hashed");
-        employee.setRole(Role.ADMIN);
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"EMPLOYEE", "ADMIN"})
+    void login_shouldReturnTokens_whenEmployeeCredentialsValid(Role role) {
+        Employee employee = Employee.builder()
+                .username("admin").password("hashed").role(role).build();
 
         when(employeeRepository.findByUsername("admin")).thenReturn(Optional.of(employee));
         when(passwordEncoder.matches("password123", "hashed")).thenReturn(true);
-        when(jwtTokenProvider.generateToken("admin", "ADMIN")).thenReturn("access-token");
+        when(jwtTokenProvider.generateToken("admin", role.name())).thenReturn("access-token");
         when(jwtTokenProvider.generateRefreshToken()).thenReturn("refresh-token");
 
         LoginRequest request = new LoginRequest();
@@ -59,7 +62,9 @@ class AuthServiceTest {
 
         assertEquals("access-token", response.getAccessToken());
         assertEquals("admin", response.getUsername());
-        assertEquals("ADMIN", response.getRole());
+        assertEquals(role.name(), response.getRole());
+        assertEquals("refresh-token", response.getRefreshToken());
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     @Test
@@ -72,7 +77,8 @@ class AuthServiceTest {
         request.setPassword("password123");
 
         AppException exception = assertThrows(AppException.class, () -> authService.login(request));
-        assertEquals(ErrorCode.CUSTOMER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.INVALID_USERNAME_OR_PASSWORD, exception.getErrorCode());
+        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository);
     }
 
     @Test
@@ -91,6 +97,88 @@ class AuthServiceTest {
 
         AppException exception = assertThrows(AppException.class, () -> authService.login(request));
         assertEquals(ErrorCode.INVALID_USERNAME_OR_PASSWORD, exception.getErrorCode());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"EMPLOYEE", "ADMIN"})
+    void login_shouldRejectDisabledEmployee_withoutIssuingTokensOrFallingBackToCustomer(Role role) {
+        Employee employee = Employee.builder()
+                .username("staff").password("hashed").role(role).enabled(false).build();
+        when(employeeRepository.findByUsername("staff")).thenReturn(Optional.of(employee));
+        when(passwordEncoder.matches("correct-password", "hashed")).thenReturn(true);
+
+        LoginRequest request = new LoginRequest();
+        request.setUsername("staff");
+        request.setPassword("correct-password");
+
+        AppException exception = assertThrows(AppException.class, () -> authService.login(request));
+
+        assertEquals(ErrorCode.USER_NOT_ACTIVE, exception.getErrorCode());
+        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository, customerRepository);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false, ACTIVE", "true, LOCKED", "false, LOCKED"})
+    void login_shouldRejectInactiveCustomer_withoutIssuingTokens(boolean enabled, CustomerStatus status) {
+        Customer customer = Customer.builder()
+                .username("customer").password("hashed").enabled(enabled).status(status).build();
+        when(employeeRepository.findByUsername("customer")).thenReturn(Optional.empty());
+        when(customerRepository.findByUsername("customer")).thenReturn(Optional.of(customer));
+        when(passwordEncoder.matches("correct-password", "hashed")).thenReturn(true);
+
+        LoginRequest request = new LoginRequest();
+        request.setUsername("customer");
+        request.setPassword("correct-password");
+
+        AppException exception = assertThrows(AppException.class, () -> authService.login(request));
+
+        assertEquals(ErrorCode.USER_NOT_ACTIVE, exception.getErrorCode());
+        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Role.class)
+    void login_shouldNotDiscloseDisabledState_whenPasswordIsWrong(Role role) {
+        if (role == Role.CUSTOMER) {
+            Customer customer = Customer.builder()
+                    .username("disabled").password("hashed").enabled(false).build();
+            when(employeeRepository.findByUsername("disabled")).thenReturn(Optional.empty());
+            when(customerRepository.findByUsername("disabled")).thenReturn(Optional.of(customer));
+        } else {
+            Employee employee = Employee.builder()
+                    .username("disabled").password("hashed").role(role).enabled(false).build();
+            when(employeeRepository.findByUsername("disabled")).thenReturn(Optional.of(employee));
+        }
+        when(passwordEncoder.matches("wrong-password", "hashed")).thenReturn(false);
+        LoginRequest request = new LoginRequest();
+        request.setUsername("disabled");
+        request.setPassword("wrong-password");
+
+        AppException exception = assertThrows(AppException.class, () -> authService.login(request));
+
+        assertEquals(ErrorCode.INVALID_USERNAME_OR_PASSWORD, exception.getErrorCode());
+        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository);
+    }
+
+    @Test
+    void login_shouldReturnTokens_whenCustomerIsActiveAndCredentialsValid() {
+        Customer customer = Customer.builder()
+                .username("customer").password("hashed").enabled(true).status(CustomerStatus.ACTIVE).build();
+        when(employeeRepository.findByUsername("customer")).thenReturn(Optional.empty());
+        when(customerRepository.findByUsername("customer")).thenReturn(Optional.of(customer));
+        when(passwordEncoder.matches("correct-password", "hashed")).thenReturn(true);
+        when(jwtTokenProvider.generateToken("customer", "CUSTOMER")).thenReturn("access-token");
+        when(jwtTokenProvider.generateRefreshToken()).thenReturn("refresh-token");
+        LoginRequest request = new LoginRequest();
+        request.setUsername("customer");
+        request.setPassword("correct-password");
+
+        LoginResponse response = authService.login(request);
+
+        assertEquals("access-token", response.getAccessToken());
+        assertEquals("refresh-token", response.getRefreshToken());
+        assertEquals("CUSTOMER", response.getRole());
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     // ========== REGISTER ==========

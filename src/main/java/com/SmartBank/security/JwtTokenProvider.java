@@ -27,7 +27,6 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    // Generate access token tu username va role
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
@@ -39,7 +38,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Extract claim tu token
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -48,12 +46,10 @@ public class JwtTokenProvider {
                 .getPayload();
     }
 
-    // Extract username tu token
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // Extract role tu token
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
@@ -67,7 +63,6 @@ public class JwtTokenProvider {
         }
     }
 
-    // Kiem tra token con han khong
     public boolean isTokenValid(String token) {
         try {
             extractAllClaims(token);

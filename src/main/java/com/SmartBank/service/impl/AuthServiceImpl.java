@@ -8,6 +8,7 @@ import com.SmartBank.dto.response.LoginResponse;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.Employee;
 import com.SmartBank.entity.RefreshToken;
+import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.entity.enums.Role;
 import com.SmartBank.exception.AppException;
 import com.SmartBank.exception.ErrorCode;
@@ -46,20 +47,28 @@ public class AuthServiceImpl implements AuthService {
         String rawPassword = request.getPassword();
         String role;
         String encodedPassword;
+        boolean active;
 
         Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
         if (employeeOpt.isPresent()) {
             encodedPassword = employeeOpt.get().getPassword();
             role = employeeOpt.get().getRole().name();
+            active = employeeOpt.get().isEnabled();
         } else {
             Customer customer = customerRepository.findByUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD));
             encodedPassword = customer.getPassword();
             role = "CUSTOMER";
+            active = customer.isEnabled() && customer.getStatus() != CustomerStatus.LOCKED;
         }
 
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+        }
+
+        // Only disclose account state after the password has been verified.
+        if (!active) {
+            throw new AppException(ErrorCode.USER_NOT_ACTIVE);
         }
 
         String accessToken = jwtTokenProvider.generateToken(username, role);

@@ -23,15 +23,15 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final TokenBlacklistService tokenBlacklistService;
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtUtil,
+            JwtTokenProvider jwtTokenProvider,
             TokenBlacklistService tokenBlacklistService,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
-        this.jwtUtil = jwtUtil;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.tokenBlacklistService = tokenBlacklistService;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
@@ -52,17 +52,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         try {
-            if (!jwtUtil.isTokenValid(token) || tokenBlacklistService.isBlacklisted(token)) {
+            if (!jwtTokenProvider.isTokenValid(token) || tokenBlacklistService.isBlacklisted(token)) {
                 reject(request, response, ErrorCode.INVALID_TOKEN);
                 return;
             }
 
-            String username = jwtUtil.extractUsername(token);
-            String role = jwtUtil.extractRole(token);
+            String username = jwtTokenProvider.extractUsername(token);
+            String role = jwtTokenProvider.extractRole(token);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    username, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (DataAccessException e) {
             // Fail closed: a Redis outage must not let revoked tokens through.
@@ -77,8 +82,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-    private void reject(HttpServletRequest request, HttpServletResponse response, ErrorCode errorCode) {
+    private void reject(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            ErrorCode errorCode) {
+
         SecurityContextHolder.clearContext();
-        handlerExceptionResolver.resolveException(request, response, null, new AppException(errorCode));
+
+        handlerExceptionResolver.resolveException(
+                request,
+                response,
+                null,
+                new AppException(errorCode)
+        );
     }
 }

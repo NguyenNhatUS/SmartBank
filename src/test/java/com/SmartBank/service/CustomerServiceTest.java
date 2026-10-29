@@ -3,6 +3,8 @@ package com.SmartBank.service;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.CustomerResponse;
 import com.SmartBank.mapper.CustomerMapper;
+import com.SmartBank.mapper.AccountMapper;
+import org.mapstruct.factory.Mappers;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
@@ -94,6 +96,21 @@ class CustomerServiceTest {
         verify(customerRepository, times(1)).save(any(Customer.class));
 
         verify(customerMapper, times(1)).toResponse(customer);
+    }
+
+    @Test
+    void create_shouldPersistEnabledCustomer_usingGeneratedMapper() {
+        CustomerServiceImpl serviceWithRealMapper = new CustomerServiceImpl(
+                customerRepository, Mappers.getMapper(CustomerMapper.class),
+                mock(AccountMapper.class), passwordEncoder);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded_password");
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        serviceWithRealMapper.create(request);
+
+        verify(customerRepository).save(argThat(created -> created.isEnabled()
+                && "encoded_password".equals(created.getPassword())
+                && request.getUsername().equals(created.getUsername())));
     }
 
     @Test

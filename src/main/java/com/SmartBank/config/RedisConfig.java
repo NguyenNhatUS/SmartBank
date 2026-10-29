@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -48,19 +50,22 @@ public class RedisConfig {
         }
 
         @Bean
-        public org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate(
+        public RedisTemplate<String, Object> redisTemplate(
                         RedisConnectionFactory connectionFactory) {
-                org.springframework.data.redis.core.RedisTemplate<String, Object> template = new org.springframework.data.redis.core.RedisTemplate<>();
+                RedisTemplate<String, Object> template = new RedisTemplate<>();
+
                 template.setConnectionFactory(connectionFactory);
+
                 template.setKeySerializer(new StringRedisSerializer());
-                template.setValueSerializer(
-                                new GenericJackson2JsonRedisSerializer());
+
+                template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
                 return template;
         }
 
         @Bean("rateLimitRedisTemplate")
-        public org.springframework.data.redis.core.StringRedisTemplate rateLimitRedisTemplate(
+        public StringRedisTemplate rateLimitRedisTemplate(
                         RedisConnectionFactory connectionFactory) {
-                return new org.springframework.data.redis.core.StringRedisTemplate(connectionFactory);
+                return new StringRedisTemplate(connectionFactory);
         }
 }

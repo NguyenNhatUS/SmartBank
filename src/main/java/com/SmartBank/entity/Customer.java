@@ -53,6 +53,7 @@ public class Customer {
     @Column(nullable = false)
     private String password;
 
+    @Builder.Default
     private boolean enabled = true;
 
     @OneToMany(

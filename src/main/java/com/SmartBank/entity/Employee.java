@@ -29,5 +29,6 @@ public class Employee {
     @Column(nullable = false)
     private Role role; // EMPLOYEE, ADMIN
 
+    @Builder.Default
     private boolean enabled = true;
 }

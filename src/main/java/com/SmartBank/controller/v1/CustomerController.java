@@ -4,6 +4,7 @@ import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.ApiResponse;
 import com.SmartBank.dto.response.CustomerResponse;
+import com.SmartBank.dto.response.PageResponse;
 import com.SmartBank.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,10 @@ public class CustomerController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<CustomerResponse>>> getAllCustomers() {
-        List<CustomerResponse> response = service.getAllCustomers();
+    public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageResponse<CustomerResponse> response = service.getAllCustomers(page, size);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

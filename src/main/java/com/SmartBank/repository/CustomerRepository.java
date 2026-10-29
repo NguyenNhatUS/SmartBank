@@ -4,6 +4,7 @@ package com.SmartBank.repository;
 import com.SmartBank.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,4 +19,17 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT DISTINCT c FROM Customer c LEFT JOIN FETCH c.accountList")
     List<Customer> findAllCustomersWithAccounts();
+
+    @Query("""
+            SELECT a.customer.id AS customerId, COUNT(a) AS totalAccounts
+            FROM Account a
+            WHERE a.customer.id IN :customerIds
+            GROUP BY a.customer.id
+            """)
+    List<CustomerAccountCount> countAccountsByCustomerIds(@Param("customerIds") List<Long> customerIds);
+
+    interface CustomerAccountCount {
+        Long getCustomerId();
+        long getTotalAccounts();
+    }
 }

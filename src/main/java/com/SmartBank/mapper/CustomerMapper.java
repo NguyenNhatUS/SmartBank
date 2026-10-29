@@ -19,4 +19,8 @@ public interface CustomerMapper {
 
     @Mapping(target = "totalAccounts", expression = "java(customer.getAccountList() == null ? 0 : customer.getAccountList().size())")
     CustomerResponse toResponse(Customer customer);
+
+    // The paginated list supplies an aggregate count without loading accountList.
+    @Mapping(target = "totalAccounts", source = "totalAccounts")
+    CustomerResponse toResponse(Customer customer, int totalAccounts);
 }

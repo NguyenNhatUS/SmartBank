@@ -3,6 +3,7 @@ package com.SmartBank.service.impl;
 import com.SmartBank.dto.request.CustomerRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerResponse;
+import com.SmartBank.dto.response.PageResponse;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
@@ -16,17 +17,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomerServiceImpl implements CustomerService {
+
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final CustomerRepository repository;
     private final CustomerMapper customerMapper;
@@ -55,12 +62,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Cacheable(value = "customers")
-    public List<CustomerResponse> getAllCustomers() {
-        return repository.findAllCustomersWithAccounts()
-                .stream()
-                .map(customerMapper::toResponse)
-                .collect(Collectors.toList());
+    public PageResponse<CustomerResponse> getAllCustomers(int page, int size) {
+        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        Page<Customer> customers = repository.findAll(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        if (customers.isEmpty()) {
+            return PageResponse.from(customers.map(customer -> customerMapper.toResponse(customer, 0)));
+        }
+
+        // Count accounts only for this page; do not fetch a collection while paginating.
+        List<Long> customerIds = customers.getContent().stream().map(Customer::getId).toList();
+        Map<Long, Long> accountCounts = repository.countAccountsByCustomerIds(customerIds).stream()
+                .collect(Collectors.toMap(CustomerRepository.CustomerAccountCount::getCustomerId,
+                        CustomerRepository.CustomerAccountCount::getTotalAccounts));
+
+        return PageResponse.from(customers.map(customer -> customerMapper.toResponse(
+                customer, Math.toIntExact(accountCounts.getOrDefault(customer.getId(), 0L)))));
     }
 
     @Override

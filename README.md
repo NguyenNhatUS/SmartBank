@@ -348,6 +348,36 @@ Authorization: Bearer <your_access_token>
 
 > **Note**: These endpoints are utilized by administrators to manage customer profile details.
 
+#### List Customer Profiles (Paginated)
+
+* **Endpoint**: `GET /api/v1/customers?page=0&size=10` (ADMIN).
+* `page` is zero-based and must be non-negative; `size` defaults to 10 and must be between 1 and 100.
+* Results are ordered by `id DESC`. The list is read from the database without the customer-list cache.
+* **Response contract change**: `data` is now a page object instead of an array. Read records from `data.content`.
+* Invalid ranges or non-integer parameters return HTTP 400 with application code `1001`.
+* A page beyond the available results returns HTTP 200 with empty `content` and the actual totals.
+
+Example response with an empty database (the normal response also includes `timestamp`):
+
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [],
+    "pageNo": 0,
+    "pageSize": 10,
+    "totalElements": 0,
+    "totalPages": 0,
+    "last": true
+  }
+}
+```
+
+Each customer retains `totalAccounts`. The service queries a page of customers and counts accounts
+for that page in one grouped query, without fetching account collections. The existing caches for
+customer detail and customer accounts are separate from this list endpoint.
+
 #### Create Customer Profile
 *   **Endpoint**: `POST /api/v1/customers`
 *   **Access**: `ADMIN`

@@ -22,12 +22,14 @@ public class RedisConfig {
         @Bean
         public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
                 // Default TTL
-                RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(10))
-                                .disableCachingNullValues()
-                                .serializeValuesWith(
-                                                RedisSerializationContext.SerializationPair
-                                                                .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                RedisCacheConfiguration defaultConfig = RedisCacheConfiguration
+                        .defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(10))
+                        .disableCachingNullValues()
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair
+                                .fromSerializer(new GenericJackson2JsonRedisSerializer())
+                        );
 
                 // TTL for each Cache
                 Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();

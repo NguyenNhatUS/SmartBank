@@ -4,6 +4,7 @@ import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.request.CustomerAccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
+import com.SmartBank.dto.response.PageResponse;
 import com.SmartBank.entity.Account;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.AccountStatus;
@@ -15,16 +16,23 @@ import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
+
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final AccountRepository accountRepository;
     private final AccountMapper mapper;
@@ -78,23 +86,27 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<CustomerAccountResponse> findAllGroupedByCustomer() {
-        return customerRepository.findAllCustomersWithAccounts()
-                .stream()
-                .map(customer -> {
-                    List<AccountResponse> accountResponses = customer.getAccountList()
-                            .stream()
-                            .map(mapper::toResponse)
-                            .toList();
+    public PageResponse<CustomerAccountResponse> findAllGroupedByCustomer(int page, int size) {
+        if (page < 0 || size < 1 || size > MAX_PAGE_SIZE) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
 
-                    return CustomerAccountResponse.builder()
-                            .customerId(customer.getId())
-                            .customerName(customer.getFullName())
-                            .customerEmail(customer.getEmail())
-                            .accounts(accountResponses)
-                            .build();
-                })
-                .toList();
+        // Paginate customers first, rather than paginating a collection fetch join.
+        Page<Customer> customers = customerRepository.findAll(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+        List<Long> customerIds = customers.getContent().stream().map(Customer::getId).toList();
+        List<Account> accounts = customers.isEmpty() ? List.of()
+                : accountRepository.findAllByCustomerIdsWithCustomer(customerIds);
+        Map<Long, List<AccountResponse>> accountsByCustomer = accounts.stream()
+                .collect(Collectors.groupingBy(account -> account.getCustomer().getId(),
+                        Collectors.mapping(mapper::toResponse, Collectors.toList())));
+
+        return PageResponse.from(customers.map(customer -> CustomerAccountResponse.builder()
+                .customerId(customer.getId())
+                .customerName(customer.getFullName())
+                .customerEmail(customer.getEmail())
+                .accounts(accountsByCustomer.getOrDefault(customer.getId(), List.of()))
+                .build()));
     }
 
     @Override

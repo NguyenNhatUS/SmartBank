@@ -5,6 +5,7 @@ import com.SmartBank.dto.request.CustomerAccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.ApiResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
+import com.SmartBank.dto.response.PageResponse;
 import com.SmartBank.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +50,10 @@ public class AccountController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<CustomerAccountResponse>>> findAllGroupedByCustomer() {
-        List<CustomerAccountResponse> response = service.findAllGroupedByCustomer();
+    public ResponseEntity<ApiResponse<PageResponse<CustomerAccountResponse>>> findAllGroupedByCustomer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageResponse<CustomerAccountResponse> response = service.findAllGroupedByCustomer(page, size);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

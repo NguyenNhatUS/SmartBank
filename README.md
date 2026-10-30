@@ -442,6 +442,38 @@ customer detail and customer accounts are separate from this list endpoint.
 ---
 
 ### 4. Account Management Endpoints
+
+#### List Accounts Grouped by Customer (Paginated)
+
+* **Endpoint**: `GET /api/v1/accounts?page=0&size=10` (EMPLOYEE or ADMIN).
+* Pagination is by **customer**, not by account. `page` starts at 0; `size` defaults to 10 and must be 1–100.
+* Customers are ordered by `id DESC`; each group's accounts are ordered by account `id ASC`.
+* **Response contract change**: `data` is a page object; groups are in `data.content`.
+  Each group still has `customerId`, `customerName`, `customerEmail`, and `accounts`.
+* `totalElements`/`totalPages` count customers. Customers with no accounts have `accounts: []`.
+  LOCKED customers remain included, matching the previous behavior.
+* Invalid pagination returns HTTP 400 / code `1001`; pages beyond the end return empty content with actual totals.
+* The service first queries a customer page, then loads accounts only for those customer IDs in one query.
+  It does not paginate a collection fetch join or query accounts separately for each customer.
+* All accounts for each selected customer are returned. A customer with very many accounts can still produce
+  a large group; independently paginating accounts would require a separate API contract.
+
+Example with an empty database (the normal response also includes `timestamp`):
+
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "content": [],
+    "pageNo": 0,
+    "pageSize": 10,
+    "totalElements": 0,
+    "totalPages": 0,
+    "last": true
+  }
+}
+```
 *Controller code:* [AccountController.java](file:///f:/SmartBank_Project/SmartBank/src/main/java/com/SmartBank/controller/v1/AccountController.java)
 
 #### Create a Personal Bank Account

@@ -4,6 +4,7 @@ import com.SmartBank.dto.request.AccountCreateRequest;
 import com.SmartBank.dto.request.CustomerAccountCreateRequest;
 import com.SmartBank.dto.response.AccountResponse;
 import com.SmartBank.dto.response.CustomerAccountResponse;
+import com.SmartBank.dto.response.PageResponse;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface AccountService {
 
     AccountResponse close(Long id);
 
-    List<CustomerAccountResponse> findAllGroupedByCustomer();
+    PageResponse<CustomerAccountResponse> findAllGroupedByCustomer(int page, int size);
 
     List<AccountResponse> getAccountsByUsername(String username);
 

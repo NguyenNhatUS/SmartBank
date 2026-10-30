@@ -239,9 +239,30 @@ Authorization: Bearer <your_access_token>
 ```
 
 ### Role-Based Access Control (RBAC)
-*   `CUSTOMER`: Allowed to manage self-service accounts (`/api/v1/accounts/my`) and perform transactions like deposit, withdraw, or transfer (`/api/v1/transactions/**`).
+*   `CUSTOMER`: Manages self-service accounts (`/api/v1/accounts/my`), reads their own account details/statements, deposits/withdraws on their own accounts, and transfers from their own accounts to another account.
 *   `EMPLOYEE`: Allowed to inspect customer accounts, view transaction logs, and freeze/close accounts.
 *   `ADMIN`: Has full administrative control over accounts, customer profiles, and system employees.
+
+Roles do not inherit from each other: `/api/v1/accounts/my` remains CUSTOMER-only.
+The URL rules and method checks must both allow the request. Account details
+(`GET /api/v1/accounts/{id}`) and statements allow ADMIN/EMPLOYEE or a CUSTOMER owner.
+The three money-writing methods enforce authorization in the service before changing balances;
+staff may operate on any account, while CUSTOMER ownership is checked using the authenticated role and username.
+Method authorization failures return HTTP 403 with application code 1003.
+
+Access tokens and refresh tokens recheck the current user in the database using `UserAccessValidator`.
+Disabled users and LOCKED customers receive HTTP 403/code 1104. Missing users, changed staff roles,
+unsupported token roles, or usernames present in both user tables receive HTTP 401/code 1105.
+Database access failures during this check return HTTP 503/code 1110. These checks add database reads
+to bearer-authenticated requests; JWT authentication remains sessionless but is not database-free.
+Requests that already passed the check are not retroactively cancelled by a later lock.
+
+All three user-creation paths check usernames against both tables. Legacy duplicate usernames
+are rejected at login instead of preferring Employee. This is application-level validation;
+there is no cross-table database UNIQUE constraint, so concurrent creation still needs a shared
+identity registry to guarantee global uniqueness. Ambiguous identities are denied access even if such a race occurs.
+Locking blocks token use while the user is inactive; it does not permanently revoke every token.
+If the user is re-enabled, otherwise-valid tokens may work again. Refresh rotation remains non-atomic.
 
 ---
 

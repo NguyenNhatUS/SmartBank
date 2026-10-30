@@ -1,6 +1,7 @@
 package com.SmartBank.service;
 
 import com.SmartBank.dto.request.LoginRequest;
+import com.SmartBank.dto.request.CreateEmployeeRequest;
 import com.SmartBank.dto.request.RefreshRequest;
 import com.SmartBank.dto.request.RegisterRequest;
 import com.SmartBank.dto.response.LoginResponse;
@@ -15,6 +16,9 @@ import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
+import com.SmartBank.security.UserAccessValidator;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,6 +46,12 @@ class AuthServiceTest {
 
     @InjectMocks
     private AuthServiceImpl authService;
+
+    @BeforeEach
+    void configureUserValidation() {
+        ReflectionTestUtils.setField(authService, "userAccessValidator",
+                new UserAccessValidator(customerRepository, employeeRepository));
+    }
 
     @ParameterizedTest
     @EnumSource(value = Role.class, names = {"EMPLOYEE", "ADMIN"})
@@ -114,7 +124,8 @@ class AuthServiceTest {
         AppException exception = assertThrows(AppException.class, () -> authService.login(request));
 
         assertEquals(ErrorCode.USER_NOT_ACTIVE, exception.getErrorCode());
-        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository, customerRepository);
+        verifyNoInteractions(jwtTokenProvider, refreshTokenRepository);
+        verify(customerRepository).findByUsername("staff");
     }
 
     @ParameterizedTest
@@ -181,6 +192,49 @@ class AuthServiceTest {
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
+    @Test
+    void loginRejectsAmbiguousUsernameInsteadOfChoosingEmployee() {
+        when(employeeRepository.findByUsername("shared")).thenReturn(Optional.of(
+                Employee.builder().username("shared").role(Role.EMPLOYEE).build()));
+        when(customerRepository.findByUsername("shared")).thenReturn(Optional.of(
+                Customer.builder().username("shared").build()));
+        LoginRequest request = new LoginRequest();
+        request.setUsername("shared");
+        request.setPassword("password");
+
+        AppException error = assertThrows(AppException.class, () -> authService.login(request));
+
+        assertEquals(ErrorCode.INVALID_USERNAME_OR_PASSWORD, error.getErrorCode());
+        verifyNoInteractions(passwordEncoder, jwtTokenProvider, refreshTokenRepository);
+    }
+
+    @Test
+    void createEmployeeRejectsUsernameAlreadyOwnedByCustomer() {
+        when(customerRepository.findByUsername("customer")).thenReturn(Optional.of(new Customer()));
+        CreateEmployeeRequest request = CreateEmployeeRequest.builder().username("customer")
+                .password("password").role(Role.EMPLOYEE).build();
+
+        AppException error = assertThrows(AppException.class, () -> authService.createEmployee(request));
+
+        assertEquals(ErrorCode.USERNAME_ALREADY_EXISTS, error.getErrorCode());
+        verify(employeeRepository, never()).save(any());
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    void registerRejectsUsernameAlreadyOwnedByEmployee() {
+        when(employeeRepository.findByUsername("staff")).thenReturn(Optional.of(new Employee()));
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("staff");
+        request.setPassword("password");
+
+        AppException error = assertThrows(AppException.class, () -> authService.register(request));
+
+        assertEquals(ErrorCode.USERNAME_ALREADY_EXISTS, error.getErrorCode());
+        verify(customerRepository, never()).save(any());
+        verifyNoInteractions(passwordEncoder);
+    }
+
     // ========== REGISTER ==========
 
     @Test
@@ -227,6 +281,8 @@ class AuthServiceTest {
                 .build();
 
         when(refreshTokenRepository.findByToken("valid-refresh")).thenReturn(Optional.of(stored));
+        when(employeeRepository.findByUsername("admin")).thenReturn(Optional.of(
+                Employee.builder().username("admin").role(Role.ADMIN).build()));
         when(jwtTokenProvider.generateToken("admin", "ADMIN")).thenReturn("new-access-token");
         when(jwtTokenProvider.generateRefreshToken()).thenReturn("new-refresh-token");
 

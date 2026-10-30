@@ -2,6 +2,7 @@ package com.SmartBank.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -54,6 +55,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
 
         ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ErrorResponse.of(errorCode, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+        ErrorCode errorCode = ErrorCode.FORBIDDEN;
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ErrorResponse.of(errorCode, request.getRequestURI()));
     }

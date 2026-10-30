@@ -26,13 +26,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final TokenBlacklistService tokenBlacklistService;
+    private final UserAccessValidator userAccessValidator;
 
     public JwtAuthenticationFilter(
             JwtTokenProvider jwtTokenProvider,
             TokenBlacklistService tokenBlacklistService,
+            UserAccessValidator userAccessValidator,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.tokenBlacklistService = tokenBlacklistService;
+        this.userAccessValidator = userAccessValidator;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
@@ -59,6 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String username = jwtTokenProvider.extractUsername(token);
             String role = jwtTokenProvider.extractRole(token);
+            userAccessValidator.validate(username, role);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -69,6 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (AppException e) {
+            reject(request, response, e.getErrorCode());
+            return;
         } catch (DataAccessException e) {
             // Fail closed: a Redis outage must not let revoked tokens through.
             reject(request, response, ErrorCode.AUTH_SERVICE_UNAVAILABLE);

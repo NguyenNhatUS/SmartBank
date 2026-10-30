@@ -49,13 +49,13 @@ class TokenBlacklistTest {
         ReflectionTestUtils.setField(jwt, "secretKey", "test-only-signing-key-with-at-least-32-bytes-long");
         ReflectionTestUtils.setField(jwt, "expiration", 900000L);
         refreshTokens = mock(RefreshTokenRepository.class);
-        auth = new AuthServiceImpl(null, null, refreshTokens, null, jwt, blacklist);
+        auth = new AuthServiceImpl(null, null, refreshTokens, null, jwt, blacklist, null);
         HandlerExceptionResolver resolver = (request, response, handler, exception) -> {
             AppException error = (AppException) exception;
             response.setStatus(error.getErrorCode().getStatus().value());
             return null;
         };
-        filter = new JwtAuthenticationFilter(jwt, blacklist, resolver);
+        filter = new JwtAuthenticationFilter(jwt, blacklist, mock(UserAccessValidator.class), resolver);
     }
 
     @AfterEach

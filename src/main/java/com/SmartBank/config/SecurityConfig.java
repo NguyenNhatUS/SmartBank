@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/transactions/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
 
                         // ── Staff operations ─────────────────────────────
+                        // Method security restricts customers to their own account.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accounts/{id}").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
                         .requestMatchers("/api/v1/accounts/**").hasAnyRole("EMPLOYEE", "ADMIN")
 
                         // ── Admin only ───────────────────────────────────

@@ -8,6 +8,7 @@ import org.mapstruct.factory.Mappers;
 import com.SmartBank.entity.Customer;
 import com.SmartBank.entity.enums.CustomerStatus;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.service.impl.CustomerServiceImpl;
 import com.SmartBank.exception.AppException;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest {
+    @Mock private EmployeeRepository employeeRepository;
 
     @Mock
     private CustomerRepository customerRepository;
@@ -99,9 +101,21 @@ class CustomerServiceTest {
     }
 
     @Test
+    void createRejectsUsernameAlreadyOwnedByEmployee() {
+        when(employeeRepository.findByUsername(request.getUsername()))
+                .thenReturn(Optional.of(new com.SmartBank.entity.Employee()));
+
+        assertThatThrownBy(() -> service.create(request)).isInstanceOfSatisfying(AppException.class,
+                error -> assertEquals(com.SmartBank.exception.ErrorCode.USERNAME_ALREADY_EXISTS, error.getErrorCode()));
+
+        verify(customerRepository, never()).save(any());
+        verifyNoInteractions(customerMapper, passwordEncoder);
+    }
+
+    @Test
     void create_shouldPersistEnabledCustomer_usingGeneratedMapper() {
         CustomerServiceImpl serviceWithRealMapper = new CustomerServiceImpl(
-                customerRepository, Mappers.getMapper(CustomerMapper.class),
+                customerRepository, employeeRepository, Mappers.getMapper(CustomerMapper.class),
                 mock(AccountMapper.class), passwordEncoder);
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded_password");
         when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));

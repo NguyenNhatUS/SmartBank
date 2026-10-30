@@ -7,6 +7,7 @@ import com.SmartBank.exception.GlobalExceptionHandler;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.service.impl.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class CustomerPaginationTest {
 
     @BeforeEach
     void setUp() {
-        CustomerServiceImpl service = new CustomerServiceImpl(repository,
+        CustomerServiceImpl service = new CustomerServiceImpl(repository, mock(EmployeeRepository.class),
                 Mappers.getMapper(CustomerMapper.class), mock(AccountMapper.class), mock(PasswordEncoder.class));
         mvc = MockMvcBuilders.standaloneSetup(new CustomerController(service))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();

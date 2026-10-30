@@ -16,6 +16,7 @@ import com.SmartBank.repository.CustomerRepository;
 import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.repository.RefreshTokenRepository;
 import com.SmartBank.security.JwtTokenProvider;
+import com.SmartBank.security.UserAccessValidator;
 import com.SmartBank.service.AuthService;
 import com.SmartBank.service.TokenBlacklistService;
 import org.springframework.dao.DataAccessException;
@@ -37,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
+    private final UserAccessValidator userAccessValidator;
 
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
@@ -50,16 +52,20 @@ public class AuthServiceImpl implements AuthService {
         boolean active;
 
         Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
+        Optional<Customer> customerOpt = customerRepository.findByUsername(username);
+        if (employeeOpt.isPresent() && customerOpt.isPresent()) {
+            throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+        }
         if (employeeOpt.isPresent()) {
             encodedPassword = employeeOpt.get().getPassword();
             role = employeeOpt.get().getRole().name();
             active = employeeOpt.get().isEnabled();
         } else {
-            Customer customer = customerRepository.findByUsername(username)
+            Customer customer = customerOpt
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD));
             encodedPassword = customer.getPassword();
             role = "CUSTOMER";
-            active = customer.isEnabled() && customer.getStatus() != CustomerStatus.LOCKED;
+            active = customer.isEnabled() && customer.getStatus() == CustomerStatus.ACTIVE;
         }
 
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
@@ -95,6 +101,12 @@ public class AuthServiceImpl implements AuthService {
         if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(stored);
             throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        try {
+            userAccessValidator.validate(stored.getUsername(), stored.getRole());
+        } catch (DataAccessException e) {
+            throw new AppException(ErrorCode.AUTH_SERVICE_UNAVAILABLE);
         }
 
         // Revoke token cũ, cấp token mới (rotation)
@@ -165,6 +177,9 @@ public class AuthServiceImpl implements AuthService {
 
         if (employeeRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new AppException(ErrorCode.EMPLOYEE_ALREADY_EXISTS);
+        }
+        if (customerRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         Employee employee = Employee

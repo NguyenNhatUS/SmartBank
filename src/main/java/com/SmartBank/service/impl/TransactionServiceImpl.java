@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 
@@ -37,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwnerByAccountNumber(#request.accountNumber, authentication)")
     public TransactionResponse deposit(@Valid DepositWithDrawRequest request) {
         if (request.getAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -73,6 +75,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwnerByAccountNumber(#request.accountNumber, authentication)")
     public TransactionResponse withdraw(@Valid DepositWithDrawRequest request) {
         if (request.getAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -109,6 +112,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     @CacheEvict(value = {"accounts", "accounts_customers", "customers"}, allEntries = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwnerByAccountNumber(#request.sourceAccountNumber, authentication)")
     public TransactionResponse transfer(@Valid TransferRequest request) {
         if (request.getSourceAccountNumber() == null || request.getTargetAccountNumber() == null) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);

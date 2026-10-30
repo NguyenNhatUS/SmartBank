@@ -30,7 +30,7 @@ public class AccountController {
                 .body(ApiResponse.created("Account created successfully", response));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @accountSecurity.isOwner(#id, authentication.name)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE') or @accountSecurity.isOwner(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AccountResponse>> getById(@PathVariable Long id) {
         AccountResponse response = service.getByID(id);

@@ -12,6 +12,7 @@ import com.SmartBank.exception.ErrorCode;
 import com.SmartBank.mapper.AccountMapper;
 import com.SmartBank.mapper.CustomerMapper;
 import com.SmartBank.repository.CustomerRepository;
+import com.SmartBank.repository.EmployeeRepository;
 import com.SmartBank.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,6 +37,7 @@ public class CustomerServiceImpl implements CustomerService {
     private static final int MAX_PAGE_SIZE = 100;
 
     private final CustomerRepository repository;
+    private final EmployeeRepository employeeRepository;
     private final CustomerMapper customerMapper;
     private final AccountMapper accountMapper;
     private final PasswordEncoder passwordEncoder;
@@ -51,7 +53,8 @@ public class CustomerServiceImpl implements CustomerService {
             throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
         }
 
-        if (repository.existsByUsername(request.getUsername())) {
+        if (repository.existsByUsername(request.getUsername())
+                || employeeRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 

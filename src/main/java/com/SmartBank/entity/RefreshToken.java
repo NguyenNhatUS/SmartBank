@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_refresh_token_expires_at", columnList = "expiresAt"),
         @Index(name = "idx_refresh_token_revoked_expires", columnList = "revoked, expiresAt")
 })
+@EqualsAndHashCode
 public class RefreshToken {
 
     @Id

@@ -19,14 +19,15 @@ import java.util.List;
 @Component
 public class RateLimitAspect {
 
-    private static final RedisScript<Long> RATE_LIMIT_SCRIPT = RedisScript.of(
-            "local current = redis.call('incr', KEYS[1])\n" +
-            "if current == 1 then\n" +
-            "    redis.call('expire', KEYS[1], ARGV[1])\n" +
-            "end\n" +
-            "return current;",
-            Long.class
-    );
+    private static final RedisScript<Long> RATE_LIMIT_SCRIPT =
+        RedisScript.of("""
+            local current = redis.call('incr', KEYS[1])
+            if current == 1 then
+                redis.call('expire', KEYS[1], ARGV[1])
+            end
+            return current
+            """, Long.class
+        );
 
     private final StringRedisTemplate redisTemplate;
 
